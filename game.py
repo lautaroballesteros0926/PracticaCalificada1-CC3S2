@@ -11,7 +11,8 @@ class Game:
         self.player1 = Player()
         self.player2 = Player()
         self.meteorites = pygame.sprite.Group()
-
+        self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
+        self.start_time = pygame.time.get_ticks()  # Guardar el tiempo de inicio del juego
     def loop(self):
         running = True
         while running:
@@ -46,4 +47,16 @@ class Game:
         self.screen.blit(self.player1.image, self.player1.rect)
         self.screen.blit(self.player2.image, self.player2.rect)
         self.meteorites.draw(self.screen)
+        self.display_time()
         pygame.display.flip()
+    
+    def display_time(self):
+        # Calcular el tiempo en segundos desde que comenzó el juego
+        current_time = pygame.time.get_ticks() - self.start_time
+        seconds = current_time // 1000  # Convertir a segundos
+
+        # Renderizar el texto con la fuente
+        time_text = self.font.render(f"Tiempo: {seconds} s", True, (255, 255, 255))  # Texto en blanco
+
+        # Dibujar el texto en la esquina superior izquierda
+        self.screen.blit(time_text, (10, 10))
