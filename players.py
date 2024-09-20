@@ -3,7 +3,7 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('cohete.png')
+        self.image = pygame.image.load('sprites/cohete.png')
         self.rect = self.image.get_rect()
         self.rect.centerx = 400
         self.rect.bottom = 600

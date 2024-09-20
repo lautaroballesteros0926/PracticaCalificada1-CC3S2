@@ -10,6 +10,11 @@ class Game:
         self.background = Background()
         self.player = Player()
         self.meteorites = pygame.sprite.Group()
+	# Crear meteoritos
+        for _ in range(10):  # Generar 10 meteoritos
+            meteorite = Meteorite()
+            self.meteorites.add(meteorite)
+
 
     def loop(self):
         running = True
