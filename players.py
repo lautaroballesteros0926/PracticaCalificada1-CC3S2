@@ -4,6 +4,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load('sprites/cohete.png')
+        self.image = pygame.transform.flip(self.image, False, True)
         self.rect = self.image.get_rect()
         self.rect.centerx = 400
         self.rect.bottom = 600
