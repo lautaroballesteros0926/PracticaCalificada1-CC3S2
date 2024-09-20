@@ -4,7 +4,7 @@ from game import Game
 def main():
     pygame.init()
     game = Game()
-    game.loop()
+    game.main_menu()
     pygame.quit()
 
 if __name__ == "__main__":
