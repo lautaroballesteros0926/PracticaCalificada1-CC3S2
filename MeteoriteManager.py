@@ -18,4 +18,9 @@ class MeteoriteManager:
 
     def draw(self,screen):
         self.meteorites.draw(screen)
+
+    def check_collisions(self, player):
+        """Verificar colisiones entre meteoritos y el jugador."""
+        collisions = pygame.sprite.spritecollide(player, self.meteorites, False)
+        return collisions
         

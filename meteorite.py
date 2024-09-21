@@ -15,3 +15,11 @@ class Meteorite(pygame.sprite.Sprite):
         if self.rect.y > 600:
             self.rect.y = random.randint(-100, -40)
             self.rect.x = random.randint(0, 800)
+
+    def check_collision(self, player):
+        """Verificar colisión con el jugador."""
+        return self.rect.colliderect(player.rect)
+    
+    def reset_position(self):
+        self.rect.x = random.randint(0, 800)
+        self.rect.y = random.randint(-100, -40)
