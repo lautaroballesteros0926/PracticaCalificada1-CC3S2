@@ -2,6 +2,7 @@ import pygame
 from background import Background
 from meteorite import Meteorite
 from players import Player
+from coin import Coin
 
 class Game:
     def __init__(self):
@@ -11,6 +12,7 @@ class Game:
         self.player1 = Player()
         self.player2 = Player()
         self.meteorites = pygame.sprite.Group()
+        self.coins = pygame.sprite.Group()
 
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
         self.start_time = pygame.time.get_ticks()  # Guardar el tiempo de inicio del juego
@@ -19,6 +21,9 @@ class Game:
             meteorite = Meteorite()
             self.meteorites.add(meteorite)
 
+        for _ in range(3):
+            coin = Coin()
+            self.coins.add(coin)
 
     def loop(self):
         running = True
@@ -45,13 +50,17 @@ class Game:
 
     def update(self):
         self.meteorites.update()
+        self.coins.update()
         self.player1.update()
         self.player2.update()
 
     def draw(self):
+        self.player1.image = pygame.image.load('sprites/cohete1.png')
+        self.player2.image = pygame.image.load('sprites/cohete2.png')
         self.screen.blit(self.background.image, self.background.rect)
         self.screen.blit(self.player1.image, self.player1.rect)
         self.screen.blit(self.player2.image, self.player2.rect)
+        self.coins.draw(self.screen)
         self.meteorites.draw(self.screen)
         self.display_time()
         pygame.display.flip()
