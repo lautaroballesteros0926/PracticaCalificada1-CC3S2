@@ -1,6 +1,6 @@
 import pygame
 from background import Background
-from meteorite import Meteorite
+from MeteoriteManager import MeteoriteManager
 from players import Player
 from coin import Coin
 
@@ -11,15 +11,14 @@ class Game:
         self.background = Background()
         self.player1 = Player()
         self.player2 = Player()
-        self.meteorites = pygame.sprite.Group()
+        self.meteorite_manager = MeteoriteManager(10)
+        self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
+        self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
         self.coins = pygame.sprite.Group()
 
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
         self.start_time = pygame.time.get_ticks()  # Guardar el tiempo de inicio del juego
-	      # Crear meteoritos
-        for _ in range(10):  # Generar 10 meteoritos
-            meteorite = Meteorite()
-            self.meteorites.add(meteorite)
+
 
         for _ in range(3):
             coin = Coin()
@@ -49,10 +48,31 @@ class Game:
             self.player2.move(5, 0)
 
     def update(self):
-        self.meteorites.update()
+        self.meteorite_manager.update()
         self.coins.update()
+
         self.player1.update()
         self.player2.update()
+        # Verificar colisiones para ambos jugadores
+        collisions_p1 = self.meteorite_manager.check_collisions(self.player1)
+        collisions_p2 = self.meteorite_manager.check_collisions(self.player2)
+
+        # Contar colisiones para el jugador 1
+        if collisions_p1:
+            for meteorite in collisions_p1:
+                meteorite.reset_position()  # Reinicia la posición del meteorito
+                self.collision_count_p1 += 1  # Incrementa el contador de colisiones
+                print(f"Colisiones Jugador 1: {self.collision_count_p1}")  # Imprimir contador
+
+        # Contar colisiones para el jugador 2
+        if collisions_p2:
+            for meteorite in collisions_p2:
+                meteorite.reset_position()  # Reinicia la posición del meteorito
+                self.collision_count_p2 += 1  # Incrementa el contador de colisiones
+                print(f"Colisiones Jugador 2: {self.collision_count_p2}")  # Imprimir contador
+
+
+    
 
     def draw(self):
         self.player1.image = pygame.image.load('sprites/cohete1.png')
@@ -60,8 +80,19 @@ class Game:
         self.screen.blit(self.background.image, self.background.rect)
         self.screen.blit(self.player1.image, self.player1.rect)
         self.screen.blit(self.player2.image, self.player2.rect)
+
+        self.meteorite_manager.draw(self.screen)
+        
+        # Mostrar contadores de colisiones
+        font = pygame.font.Font(None, 36)
+        text_p1 = font.render(f"Colisiones P1: {self.collision_count_p1}", True, (255, 255, 255))
+        text_p2 = font.render(f"Colisiones P2: {self.collision_count_p2}", True, (255, 255, 255))
+        
+        self.screen.blit(text_p1, (10, 10))  # Dibuja el texto para el jugador 1
+        self.screen.blit(text_p2, (10, 40))  # Dibuja el texto para el jugador 2
+
+
         self.coins.draw(self.screen)
-        self.meteorites.draw(self.screen)
         self.display_time()
         pygame.display.flip()
     
