@@ -150,6 +150,8 @@ class Game:
                         if self.buttom_rect_off.collidepoint(mouse_pos):
                             # cerramos la ventana
                             runing = False
+                        if self.buttom_rect_stats.collidepoint(mouse_pos):
+                            self.stats_screen()
                             
     def draw_menu(self): 
         pygame.display.set_caption("Menú de Juego")
@@ -161,20 +163,42 @@ class Game:
         title_menu = pygame.image.load("sprites/boton_menu.png")
         buttom_start = pygame.image.load("sprites/boton_start.png")
         buttom_off = pygame.image.load("sprites/boton_off.png")
+        buttom_stats = pygame.image.load("sprites/boton_stats.png")
 
         # Crear un rectángulo a partir de la imagen del botón
         self.buttom_rect_start = buttom_start.get_rect()  # Hacemos self para acceder a este rectángulo desde main_menu
         self.buttom_rect_start.topleft = (330, 270)  # Posición del botón en la pantalla
+        self.buttom_rect_stats = buttom_stats.get_rect()
+        self.buttom_rect_stats.topleft = (330, 345)  # Posición del botón en la pantalla
         self.buttom_rect_off = buttom_off.get_rect()  # Igual para este botón
-        self.buttom_rect_off.topleft = (380, 350)
+        self.buttom_rect_off.topleft = (380, 420)
 
         # Dibujar el texto menú y botones en la pantalla
         self.screen.blit(title_menu, (280, 100))
         self.screen.blit(buttom_start, self.buttom_rect_start.topleft)
+        self.screen.blit(buttom_stats, self.buttom_rect_stats.topleft)
         self.screen.blit(buttom_off, self.buttom_rect_off.topleft)
 
         pygame.display.flip()
 
+    def stats_screen(self):
+        running = True
+        while running:
+            self.draw_stats_screen()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    
+        pygame.display.flip()
+            
+    def draw_stats_screen(self):
+        pygame.display.set_caption("Estadisticas")
+        background_image = pygame.image.load("sprites/fondo_espacial.jpg")
+        self.screen.blit(background_image, (0, 0))
+        
+        pygame.display.flip()
+
+    
     def end_screen(self):
         print('Ingreso')
         running = True
