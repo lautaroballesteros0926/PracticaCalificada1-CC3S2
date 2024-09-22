@@ -3,6 +3,11 @@ from background import Background
 from players import Player
 from coin import Coin
 from meteorite import Meteorite
+from gamestats import GameStats,Session
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
@@ -41,7 +46,10 @@ class Game:
             # Se detendrá el juego si uno de los jugadores llega a 100 o si ambos pierden todas sus vidas
             if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
                 print('Ingresando al menú de finalización')
+                self.end_game() #Guarda estadisticas del juego
                 self.end_screen()
+                # Al finalizar el juego
+                # Al finalizar el juego               
                 running = False  # detiene el bucle del juego
 
 
@@ -100,6 +108,42 @@ class Game:
                 self.player1.update_score()
             else:
                 self.player2.update_score()
+
+
+
+    def save_game_stats(self,player1_collisions, player2_collisions, winner, score_player1, score_player2):
+        session = Session()
+        new_stats = GameStats(
+            player1_collisions=player1_collisions,
+            player2_collisions=player2_collisions,
+            winner=winner,
+            score_player1=score_player1,
+            score_player2=score_player2
+        )
+        session.add(new_stats)
+        session.commit()
+        session.close()
+
+
+
+    def end_game(self):
+        winner = "Jugador 1" if self.player1.score > self.player2.score else "Jugador 2"
+        
+        # Llamar a la función para guardar las estadísticas
+        self.save_game_stats(
+            player1_collisions=self.collision_count_p1,
+            player2_collisions=self.collision_count_p2,
+            winner=winner,
+            score_player1=self.player1.score,
+            score_player2=self.player2.score
+        )
+        
+        # Mostrar mensaje de fin del juego
+        print(f"¡Juego terminado! Ganador: {winner}")
+
+
+
+
 
     def draw(self):
         # Dibuja el fondo
@@ -168,18 +212,6 @@ class Game:
         while running:
             # Dibujar la pantalla de finalización
             self.draw_end_screen()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Botón izquierdo del ratón
-                        mouse_pos = pygame.mouse.get_pos()
-                        if self.button_rect_restart.collidepoint(mouse_pos):
-                            running = False  # Salir de la pantalla de finalización y reiniciar el juego
-                        if self.button_rect_menu.collidepoint(mouse_pos):
-                            running = False  # Salir de la pantalla de finalización y regresar al menú
-
             pygame.display.flip()
 
     
@@ -204,26 +236,26 @@ class Game:
         # Título de "Game Over" o similar
         font = pygame.font.Font(None, 57)
         game_over_text = font.render("¡Juego Terminado!", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 10))
+        self.screen.blit(game_over_text, (200, 110))
 
         # Escribir ganador
         font = pygame.font.Font(None, 50)
-        if self.player1.score ==100:
+        if self.player1.score > self.player2.score:
             game_over_text = font.render("Ganó el Jugador 1", True, (255, 255, 255))
-            self.screen.blit(game_over_text, (200, 80))
-        elif self.player2.score ==100:
+            self.screen.blit(game_over_text, (200, 160))
+        elif self.player2.score > self.player1.score:
             game_over_text = font.render("Ganó el Jugador 2", True, (255, 255, 255))
-            self.screen.blit(game_over_text, (200, 80))
+            self.screen.blit(game_over_text, (200, 160))
 
         #Estadisticas
         font = pygame.font.Font(None, 50)
         game_over_text = font.render("Resumen del Juego:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 150))
+        self.screen.blit(game_over_text, (200, 200))
 
         #Jugador1
         font = pygame.font.Font(None, 35)
         game_over_text = font.render("Jugador1:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 210))
+        self.screen.blit(game_over_text, (200, 260))
 
 
 
@@ -234,12 +266,12 @@ class Game:
             True,
             (255, 255, 255)
         )
-        self.screen.blit(game_over_text, (200, 250))
+        self.screen.blit(game_over_text, (200, 300))
 
         #Jugador2
         font = pygame.font.Font(None, 35)
         game_over_text = font.render("Jugador2:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 270))
+        self.screen.blit(game_over_text, (200, 340))
 
 
 
@@ -250,6 +282,6 @@ class Game:
             True,
             (255, 255, 255)
         )
-        self.screen.blit(game_over_text, (200, 310))
+        self.screen.blit(game_over_text, (200, 380))
 
         pygame.display.flip()
