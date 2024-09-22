@@ -193,17 +193,63 @@ class Game:
         button_menu = pygame.image.load("sprites/boton_menu.png")
 
         self.button_rect_restart = button_restart.get_rect()
-        self.button_rect_restart.topleft = (300, 250)
+        self.button_rect_restart.topleft = (300, 500)
         self.button_rect_menu = button_menu.get_rect()
-        self.button_rect_menu.topleft = (300, 350)
+        self.button_rect_menu.topleft = (300, 550)
 
         # Mostrar los botones en la pantalla
         self.screen.blit(button_restart, self.button_rect_restart.topleft)
         self.screen.blit(button_menu, self.button_rect_menu.topleft)
 
         # Título de "Game Over" o similar
-        font = pygame.font.Font(None, 74)
+        font = pygame.font.Font(None, 57)
         game_over_text = font.render("¡Juego Terminado!", True, (255, 255, 255))
+        self.screen.blit(game_over_text, (200, 10))
+
+        # Escribir ganador
+        font = pygame.font.Font(None, 50)
+        if self.player1.score ==100:
+            game_over_text = font.render("Ganó el Jugador 1", True, (255, 255, 255))
+            self.screen.blit(game_over_text, (200, 80))
+        elif self.player2.score ==100:
+            game_over_text = font.render("Ganó el Jugador 2", True, (255, 255, 255))
+            self.screen.blit(game_over_text, (200, 80))
+
+        #Estadisticas
+        font = pygame.font.Font(None, 50)
+        game_over_text = font.render("Resumen del Juego:", True, (255, 255, 255))
         self.screen.blit(game_over_text, (200, 150))
+
+        #Jugador1
+        font = pygame.font.Font(None, 35)
+        game_over_text = font.render("Jugador1:", True, (255, 255, 255))
+        self.screen.blit(game_over_text, (200, 210))
+
+
+
+        #Score jugador 1
+        font = pygame.font.Font(None, 28)
+        game_over_text = font.render(
+            f"Número de colisiones: {self.collision_count_p1}, Score del jugador: {self.player1.score}",
+            True,
+            (255, 255, 255)
+        )
+        self.screen.blit(game_over_text, (200, 250))
+
+        #Jugador2
+        font = pygame.font.Font(None, 35)
+        game_over_text = font.render("Jugador2:", True, (255, 255, 255))
+        self.screen.blit(game_over_text, (200, 270))
+
+
+
+        #Score jugador 2
+        font = pygame.font.Font(None, 28)
+        game_over_text = font.render(
+            f"Número de colisiones: {self.collision_count_p2}, Score del jugador: {self.player2.score}",
+            True,
+            (255, 255, 255)
+        )
+        self.screen.blit(game_over_text, (200, 310))
 
         pygame.display.flip()
