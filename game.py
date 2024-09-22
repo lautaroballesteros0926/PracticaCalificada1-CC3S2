@@ -15,8 +15,10 @@ class Game:
         self.coins = pygame.sprite.Group()
         self.meteorites = pygame.sprite.Group()
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
+        self.start_time = pygame.time.get_ticks()  # Guardar el tiempo de inicio del juego
+
         # Crear meteoritos
-        for _ in range(10):
+        for _ in range(2):
             meteorite = Meteorite()
             self.meteorites.add(meteorite)
         # Crear monedas
@@ -61,8 +63,10 @@ class Game:
     def update(self):
         
         self.background.update()  # Actualiza el fondo
-
+        self.player1.update()
+        self.player2.update()
         # Actualizamos posiciones de los sprites 
+        
         self.meteorites.update()
         self.coins.update()
 
@@ -133,23 +137,6 @@ class Game:
         runing = True
         while runing:
             self.draw_menu()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    runing = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # 1 es el botón izquierdo del ratón
-                        # Obtener la posición del clic
-                        mouse_pos = pygame.mouse.get_pos()
-                        # Verificar si el clic ocurrió dentro del área del botón
-                        if self.buttom_rect_start.collidepoint(mouse_pos):
-                            # entra al juego directamente
-                            self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                            self.loop()
-                            # cerramos si cierras la ventana en loop
-                            runing = False
-                        if self.buttom_rect_off.collidepoint(mouse_pos):
-                            # cerramos la ventana
-                            runing = False
                             
     def draw_menu(self): 
         pygame.display.set_caption("Menú de Juego")
