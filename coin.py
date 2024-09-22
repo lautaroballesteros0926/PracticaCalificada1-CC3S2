@@ -13,5 +13,8 @@ class Coin(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.speed
         if self.rect.y > 600:
-            self.rect.y = random.randint(-100, -40)
-            self.rect.x = random.randint(0, 800)
+            self.reset_position()
+            
+    def reset_position(self):
+        self.rect.y = random.randint(-100, -40)
+        self.rect.x = random.randint(0, 800)

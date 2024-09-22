@@ -1,12 +1,13 @@
 import pygame
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,image_path,position):
         super().__init__()
-        self.image = pygame.image.load('sprites/cohete.png')
+        self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect()
-        self.rect.centerx = 400
+        self.rect.centerx = position         #coordenada del eje x del centro de la imagen 
         self.rect.bottom = 600
+        self.score = 0
 
     def move(self, dx, dy):
         self.rect.x += dx
@@ -17,11 +18,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0  # No permitir que se salga por la izquierda
         if self.rect.right > 800:
             self.rect.right = 800  # No permitir que se salga por la derecha
-        if self.rect.top < 0:
-            self.rect.top = 0  # No permitir que se salga por arriba
-        if self.rect.bottom > 600:
-            self.rect.bottom = 600  # No permitir que se salga por abajo
-
-    def update(self):
-        # Puedes agregar lógica adicional para el jugador si es necesario
-        pass
+            
+    def update_score(self): 
+        self.score=self.score+20 

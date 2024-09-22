@@ -1,29 +1,32 @@
 import pygame
 from background import Background
-from MeteoriteManager import MeteoriteManager
 from players import Player
 from coin import Coin
-
+from meteorite import Meteorite
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         self.clock = pygame.time.Clock()
-        self.background = Background()
-        self.player1 = Player()
-        self.player2 = Player()
-        self.meteorite_manager = MeteoriteManager(10)
+        self.player1 = Player('sprites/cohete1.png',600)
+        self.player2 = Player('sprites/cohete2.png',200)
         self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
         self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
+        # grupo de sprites
         self.coins = pygame.sprite.Group()
-
+        self.meteorites = pygame.sprite.Group()
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
-        self.start_time = pygame.time.get_ticks()  # Guardar el tiempo de inicio del juego
-
-
+        # Crear meteoritos
+        for _ in range(10):
+            meteorite = Meteorite()
+            self.meteorites.add(meteorite)
+        # Crear monedas
         for _ in range(3):
             coin = Coin()
             self.coins.add(coin)
+        # Fondo 
+        self.background = Background() 
 
+    # Loop principal 
     def loop(self):
         running = True
         while running:
@@ -33,9 +36,16 @@ class Game:
             self.handle_input()
             self.update()
             self.draw()
+            # Se detendrá el juego si uno de los jugadores llega a 100 o si ambos pierden todas sus vidas
+            if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
+                print('Ingresando al menú de finalización')
+                self.end_screen()
+                running = False  # detiene el bucle del juego
+
 
             self.clock.tick(60)
-
+    
+    # Controla las teclas para players 
     def handle_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -47,66 +57,74 @@ class Game:
         if keys[pygame.K_d]:
             self.player2.move(5, 0)
 
+    #Actualiza todos los sprites 
     def update(self):
-        self.meteorite_manager.update()
+        
+        self.background.update()  # Actualiza el fondo
+
+        # Actualizamos posiciones de los sprites 
+        self.meteorites.update()
         self.coins.update()
 
-        self.player1.update()
-        self.player2.update()
-        # Verificar colisiones para ambos jugadores
-        collisions_p1 = self.meteorite_manager.check_collisions(self.player1)
-        collisions_p2 = self.meteorite_manager.check_collisions(self.player2)
+        # Verificar colisiones si es que no llegan a 100 y aun no se le acaba las vida (maximo 3 choques)
+        if self.player1.score <100 and self.collision_count_p1<3:
+            self.check_collisions(self.player1, 1)
 
-        # Contar colisiones para el jugador 1
-        if collisions_p1:
-            for meteorite in collisions_p1:
-                meteorite.reset_position()  # Reinicia la posición del meteorito
-                self.collision_count_p1 += 1  # Incrementa el contador de colisiones
-                print(f"Colisiones Jugador 1: {self.collision_count_p1}")  # Imprimir contador
+        if self.player2.score <100 and self.collision_count_p2<3:
+            self.check_collisions(self.player2, 2)
 
-        # Contar colisiones para el jugador 2
-        if collisions_p2:
-            for meteorite in collisions_p2:
-                meteorite.reset_position()  # Reinicia la posición del meteorito
-                self.collision_count_p2 += 1  # Incrementa el contador de colisiones
-                print(f"Colisiones Jugador 2: {self.collision_count_p2}")  # Imprimir contador
+    def check_collisions(self, player, player_num):
 
-
-    
+        # Colisiones entre meteoritos y player
+        collisions = pygame.sprite.spritecollide(player, self.meteorites, False)
+        if collisions:
+            for meteorite in collisions:
+                meteorite.reset_position()
+            if player_num == 1:
+                self.collision_count_p1 += 1
+                print(f"Colisiones Jugador 1: {self.collision_count_p1}")
+            else:
+                self.collision_count_p2 += 1
+                print(f"Colisiones Jugador 2: {self.collision_count_p2}")
+        
+        #colisiones entre monedas y player
+        collisions = pygame.sprite.spritecollide(player, self.coins, False)
+        if collisions:
+            for coin in collisions:
+                coin.reset_position()
+            if player_num == 1:
+                self.player1.update_score()
+            else:
+                self.player2.update_score()
 
     def draw(self):
-        self.player1.image = pygame.image.load('sprites/cohete1.png')
-        self.player2.image = pygame.image.load('sprites/cohete2.png')
-        self.screen.blit(self.background.image, self.background.rect)
-        self.screen.blit(self.player1.image, self.player1.rect)
-        self.screen.blit(self.player2.image, self.player2.rect)
+        # Dibuja el fondo
+        self.background.draw(self.screen)
 
-        self.meteorite_manager.draw(self.screen)
+        #Dibuja los sprites si tienen puntaje menor a 100 y si aun tienen vidas 
+        if(self.player1.score < 100 and self.collision_count_p1<3): 
+            self.screen.blit(self.player1.image, self.player1.rect)
+        if(self.player2.score < 100 and self.collision_count_p2<3):
+            self.screen.blit(self.player2.image, self.player2.rect)
+
+        self.meteorites.draw(self.screen) # distinto porque es un grupo de sprites 
+        self.coins.draw(self.screen)
         
         # Mostrar contadores de colisiones
-        font = pygame.font.Font(None, 36)
-        text_p1 = font.render(f"Colisiones P1: {self.collision_count_p1}", True, (255, 255, 255))
-        text_p2 = font.render(f"Colisiones P2: {self.collision_count_p2}", True, (255, 255, 255))
-        
-        self.screen.blit(text_p1, (10, 10))  # Dibuja el texto para el jugador 1
-        self.screen.blit(text_p2, (10, 40))  # Dibuja el texto para el jugador 2
+        text_p1 = self.font.render(f"Score: {self.player1.score}", True, (255, 255, 255))
+        text_p2 = self.font.render(f"Score: {self.player2.score}", True, (255, 255, 255))
+        self.screen.blit(text_p1, (10, 10))
+        self.screen.blit(text_p2, (10, 40))
 
-
-        self.coins.draw(self.screen)
         self.display_time()
         pygame.display.flip()
-    
-    
+
     def display_time(self):
-        # Calcular el tiempo en segundos desde que comenzó el juego
+        # Restamos el tiempo actual menos el tiempo de inicio del juego 
         current_time = pygame.time.get_ticks() - self.start_time
-        seconds = current_time // 1000  # Convertir a segundos
-
-        # Renderizar el texto con la fuente
-        time_text = self.font.render(f"Tiempo: {seconds} s", True, (255, 255, 255))  # Texto en blanco
-
-        # Dibujar el texto en la esquina superior izquierda
-        self.screen.blit(time_text, (10, 10))
+        seconds = current_time // 1000
+        time_text = self.font.render(f"Tiempo: {seconds} s", True, (255, 255, 255))
+        self.screen.blit(time_text, (10, 70))
 
 
     # Creacion del menu
@@ -125,28 +143,21 @@ class Game:
                         # Verificar si el clic ocurrió dentro del área del botón
                         if self.buttom_rect_start.collidepoint(mouse_pos):
                             # entra al juego directamente
+                            self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
                             self.loop()
                             # cerramos si cierras la ventana en loop
                             runing = False
-                            print("¡Botón de inicio clicado!")
                         if self.buttom_rect_off.collidepoint(mouse_pos):
                             # cerramos la ventana
                             runing = False
-                            print("¡Botón de salida clicado!")
-
+                            
     def draw_menu(self): 
         pygame.display.set_caption("Menú de Juego")
-        # Colores
-        BLACK = (0, 0, 0)
-        # Fuentes
-        font = pygame.font.Font(None, 74)
-        font_small = pygame.font.Font(None, 36)
-
         # Cargar la imagen de fondo
         background_image = pygame.image.load("sprites/fondo.png")
         self.screen.blit(background_image, (0, 0))
 
-        # Cargando las imágenes
+        # Cargando las imágenese
         title_menu = pygame.image.load("sprites/boton_menu.png")
         buttom_start = pygame.image.load("sprites/boton_start.png")
         buttom_off = pygame.image.load("sprites/boton_off.png")
@@ -164,3 +175,48 @@ class Game:
 
         pygame.display.flip()
 
+    def end_screen(self):
+        print('Ingreso')
+        running = True
+        while running:
+            # Dibujar la pantalla de finalización
+            self.draw_end_screen()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Botón izquierdo del ratón
+                        mouse_pos = pygame.mouse.get_pos()
+                        if self.button_rect_restart.collidepoint(mouse_pos):
+                            running = False  # Salir de la pantalla de finalización y reiniciar el juego
+                        if self.button_rect_menu.collidepoint(mouse_pos):
+                            running = False  # Salir de la pantalla de finalización y regresar al menú
+
+            pygame.display.flip()
+
+    
+    def draw_end_screen(self):
+        # Fondo de la pantalla de finalización
+        background_image = pygame.image.load("sprites/fondo.png")
+        self.screen.blit(background_image, (0, 0))
+
+        # Dibujar los botones de reiniciar y volver al menú
+        button_restart = pygame.image.load("sprites/boton_off.png")
+        button_menu = pygame.image.load("sprites/boton_menu.png")
+
+        self.button_rect_restart = button_restart.get_rect()
+        self.button_rect_restart.topleft = (300, 250)
+        self.button_rect_menu = button_menu.get_rect()
+        self.button_rect_menu.topleft = (300, 350)
+
+        # Mostrar los botones en la pantalla
+        self.screen.blit(button_restart, self.button_rect_restart.topleft)
+        self.screen.blit(button_menu, self.button_rect_menu.topleft)
+
+        # Título de "Game Over" o similar
+        font = pygame.font.Font(None, 74)
+        game_over_text = font.render("¡Juego Terminado!", True, (255, 255, 255))
+        self.screen.blit(game_over_text, (200, 150))
+
+        pygame.display.flip()
