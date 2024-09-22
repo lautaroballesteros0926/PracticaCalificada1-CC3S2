@@ -6,7 +6,7 @@ import pygame
 import uvicorn
 # Inicializamos FastAPI y el juego
 app = FastAPI()
-
+pygame.init()
 
 # Modelo para mover las naves
 class MoveRequest(BaseModel):
@@ -16,7 +16,6 @@ class MoveRequest(BaseModel):
 def run_game(a):
     global game
     game=Game()
-    pygame.init()
     if a==1:
         game.main_menu()  # Inicia el menú principal del juego
     else: 
