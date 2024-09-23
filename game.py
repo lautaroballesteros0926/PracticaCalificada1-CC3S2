@@ -109,42 +109,10 @@ class Game:
                 self.player2.update_score()
 
 
-    """
-    def save_game_stats(self,player1_collisions, player2_collisions, winner, score_player1, score_player2):
-        session = Session()
-        new_stats = GameStats(
-            player1_collisions=player1_collisions,
-            player2_collisions=player2_collisions,
-            winner=winner,
-            score_player1=score_player1,
-            score_player2=score_player2
-        )
-        session.add(new_stats)
-        session.commit()
-        session.close()
-    
-    """
-
-
 
     def end_game(self):
         self.winner = "Jugador 1" if self.player1.score > self.player2.score else "Jugador 2"
         
-        """
-         # Llamar a la función para guardar las estadísticas
-            self.save_game_stats(
-                player1_collisions=self.collision_count_p1,
-                player2_collisions=self.collision_count_p2,
-                winner=self.winner,
-                score_player1=self.player1.score,
-                score_player2=self.player2.score
-            )
-            
-            # Mostrar mensaje de fin del juego
-            print(f"¡Juego terminado! Ganador: {self.winner}")
-        
-        """
-
 
     def draw(self):
         # Dibuja el fondo
@@ -231,32 +199,68 @@ class Game:
 
         pygame.display.flip()
 
+    
+            
     def stats_screen(self):
+        # Hacer la petición a la API solo una vez
+        api_url = "http://localhost:8000/games"
+        response = requests.get(api_url)
+        games = response.json()
+
         running = True
         while running:
-            self.draw_stats_screen()
+            self.draw_stats_screen(games)  # Pasar las partidas como argumento
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                     
-        pygame.display.flip()
-            
-    def draw_stats_screen(self):
-        pygame.display.set_caption("Estadisticas")
+            pygame.display.flip()
+
+    def draw_stats_screen(self, games):
+        pygame.display.set_caption("Estadísticas")
+        
+        # Cargar la imagen de fondo
         background_image = pygame.image.load("sprites/fondo_espacial.jpg")
         self.screen.blit(background_image, (0, 0))
         
+        # Configurar la fuente para mostrar el texto en pantalla
+        font = pygame.font.Font(None, 36)
+        
+        # Coordenadas iniciales para imprimir las partidas
+        y_offset = 50  # Margen superior
+        line_spacing = 40  # Espacio entre cada línea
+        
+        # Iterar sobre las partidas obtenidas de la API
+        for game in games[-5:]:  # Muestra solo las últimas 5 partidas
+            player1_score = game['player1_score']
+            player2_score = game['player2_score']
+            winner = game['winner']
+            
+            # Texto que se mostrará para cada partida
+            game_text = f"Jugador 1: {player1_score} - Jugador 2: {player2_score} - Ganador: {winner}"
+            
+            # Renderizar el texto
+            text_surface = font.render(game_text, True, (255, 255, 255))  # Texto en blanco
+            self.screen.blit(text_surface, (50, y_offset))  # Dibujar en la pantalla
+            
+            # Actualizar el offset para la siguiente línea
+            y_offset += line_spacing
+
+        # Actualizar la pantalla de Pygame
         pygame.display.flip()
+
 
     
     def end_screen(self):
         print('Ingreso')
         running = True
         while running:
-            # Dibujar la pantalla de finalización
-            self.draw_end_screen()
-            pygame.display.flip()
-
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                # Dibujar la pantalla de finalización
+                self.draw_end_screen()
+                pygame.display.flip()
     
     def draw_end_screen(self):
         # Fondo de la pantalla de finalización
