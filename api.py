@@ -6,7 +6,6 @@ import pygame
 import uvicorn
 from typing import List
 from prometheus_fastapi_instrumentator import Instrumentator
-from fastapi import FastAPI
 # Inicializamos FastAPI y el juego
 app = FastAPI()
 pygame.init()
