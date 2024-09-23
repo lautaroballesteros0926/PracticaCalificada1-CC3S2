@@ -1,6 +1,15 @@
 # Documentacion
 
+# Reglas del juego
+-El juego esta diseñado para 2 jugadores
 
+-El juego genera monedas , donde cada moneda aumenta el score del jugador en 20
+
+-El juego genera meteoritos, si la nave se estrella contra un meteorito perdera una vida y cuando se terminen las vidas de la nave, este se destruira
+
+-Cada jugador tiene 3 vidas
+
+-Gana el jugador que llegue primero a los 100 puntos o el que tenga mas score al final del juego
 # API REST - Juego de Naves Espaciales
 
 Esta API está diseñada para gestionar un juego de naves espaciales, donde los jugadores compiten para llegar a la meta evitando obstáculos. Se pueden realizar movimientos de las naves, consultar el estado del juego, y almacenar estadísticas y resultados de las partidas. Además, la API está instrumentada con Prometheus para monitorear métricas, como la velocidad de las naves y las colisiones.
