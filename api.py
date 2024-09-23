@@ -19,21 +19,25 @@ def run_game(a):
     game=Game()
     if a==1:
         game.main_menu()  # Inicia el menú principal del juego
+    elif a==2: 
+        game.stats_screen()
     else: 
         game.loop()
 
-
-
 # Endpoint para iniciar el juego
-@app.post("/open")
+@app.post("/open_menu")
 def open():
     run_game(1)
     return {"message": "Menu Abierto"}
 
-
+@app.post("/open_stats")
+def open(): 
+    run_game(2)
+    return  {"message": "Stats abierto"}
+    
 @app.post("/start_game")
 def open():
-    run_game(2)
+    run_game(3)
     return {"message": "Juego iniciado"}
 
 # Endpoint para mover la nave
@@ -75,7 +79,7 @@ def get_status(player: int):
         "collisions": collisions
     }
 
-
+""""
 @app.get("/stats")
 def get_stats():
     session = Session()
@@ -88,6 +92,7 @@ def get_stats():
              "winner": stat.winner, 
              "score_player1": stat.score_player1, 
              "score_player2": stat.score_player2} for stat in stats]
+"""
 
 
 
@@ -101,6 +106,7 @@ def close_game():
     pygame.quit()
     game = None  # Reiniciar el estado del juego
     return {"message": "Juego cerrado exitosamente"}
+
 
 
 # Guardar los datos del juego 
