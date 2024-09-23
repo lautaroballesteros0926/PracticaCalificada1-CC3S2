@@ -9,6 +9,7 @@ services:
       - .:/app
     environment:
       - DISPLAY=:0  # Si necesitas usar la pantalla del host
+      
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
