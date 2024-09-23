@@ -4,6 +4,7 @@ from game import Game  # Importamos tu código de la clase Game
 from gamestats import Session,GameStats
 import pygame
 import uvicorn
+from typing import List
 # Inicializamos FastAPI y el juego
 app = FastAPI()
 pygame.init()
@@ -101,6 +102,31 @@ def close_game():
     game = None  # Reiniciar el estado del juego
     return {"message": "Juego cerrado exitosamente"}
 
+
+# Guardar los datos del juego 
+
+class GameData(BaseModel):
+    player1_score: int
+    player2_score: int
+    winner: str
+
+# Base de datos simulada para almacenar las partidas
+games = []
+
+@app.post("/games")
+def create_game(game: GameData):
+    """
+    Crea una nueva partida y la almacena.
+    """
+    games.append(game)
+    return {"message": "Partida almacenada exitosamente", "game": game}
+
+@app.get("/games", response_model=List[GameData])
+def get_games():
+    """
+    Retorna todas las partidas anteriores.
+    """
+    return games
 
 # Ejecutar el servidor usando uvicorn
 if __name__ == "__main__":
