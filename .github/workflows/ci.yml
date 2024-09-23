@@ -28,3 +28,9 @@ jobs:
 
       - name: Run safety
         run: safety check --ignore=70612
+
+      - name: Build Docker image
+        run: docker build -t spacegame .
+
+      - name: Run Docker container
+        run: docker run -d -p 8000:8000 spacegame
