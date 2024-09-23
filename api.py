@@ -112,12 +112,6 @@ class GameData(BaseModel):
 
 # Base de datos simulada para almacenar las partidas
 games = []
-@app.get("/games", response_model=List[GameData])
-def get_games():
-    """
-    Retorna todas las partidas anteriores.
-    """
-    return games
 
 @app.post("/games")
 def create_game(game: GameData):
@@ -126,6 +120,13 @@ def create_game(game: GameData):
     """
     games.append(game)
     return {"message": "Partida almacenada exitosamente", "game": game}
+
+@app.get("/games", response_model=List[GameData])
+def get_games():
+    """
+    Retorna todas las partidas anteriores.
+    """
+    return games
 
 # Ejecutar el servidor usando uvicorn
 if __name__ == "__main__":
