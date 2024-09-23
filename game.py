@@ -219,7 +219,7 @@ class Game:
         pygame.display.set_caption("Estadísticas")
         
         # Cargar la imagen de fondo
-        background_image = pygame.image.load("sprites/fondo_espacial.jpg")
+        background_image = pygame.image.load("sprites/fondo_espacial.png")
         self.screen.blit(background_image, (0, 0))
         
         # Configurar la fuente para mostrar el texto en pantalla
