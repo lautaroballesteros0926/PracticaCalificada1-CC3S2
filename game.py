@@ -3,10 +3,10 @@ from background import Background
 from players import Player
 from coin import Coin
 from meteorite import Meteorite
-from gamestats import GameStats,Session
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+#from gamestats import GameStats,Session
+#from sqlalchemy import create_engine
+#from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.orm import sessionmaker
 import requests 
 class Game:
     def __init__(self):
@@ -71,8 +71,7 @@ class Game:
     def update(self):
         
         self.background.update()  # Actualiza el fondo
-        self.player1.update()
-        self.player2.update()
+        
         # Actualizamos posiciones de los sprites 
         
         self.meteorites.update()
