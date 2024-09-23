@@ -5,9 +5,13 @@ from gamestats import Session,GameStats
 import pygame
 import uvicorn
 from typing import List
+from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi import FastAPI
 # Inicializamos FastAPI y el juego
 app = FastAPI()
 pygame.init()
+
+Instrumentator().instrument(app).expose(app)
 
 # Modelo para mover las naves
 class MoveRequest(BaseModel):
