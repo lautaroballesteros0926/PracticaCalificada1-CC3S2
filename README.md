@@ -161,6 +161,134 @@ http://127.0.0.1:8000
 
 ---
 
-## Prometheus Metrics
+# ¿Cómo Jugar?
 
-La API está instrumentada con `prometheus_fastapi_instrumentator` para recopilar métricas de la aplicación, como el número de peticiones y la latencia. Estas métricas están disponibles en `/metrics`.
+### Paso 1: Clonar el repositorio
+1. Abre una terminal en tu computadora.
+2. Usa el siguiente comando para clonar el repositorio del proyecto:
+   ```bash
+   git clone https://github.com/lautaroballesteros0926/PracticaCalificada1-CC3S2.git
+   ```
+
+3. Una vez clonado, navega dentro de la carpeta del proyecto:
+   ```bash
+   cd nombre_del_repositorio
+   ```
+
+### Paso 2: Crear un entorno virtual
+1. Crea un entorno virtual en el directorio del proyecto. Esto aísla las dependencias del proyecto:
+   ```bash
+   python -m venv env
+   ```
+
+2. Activa el entorno virtual:
+   - **En Windows**:
+     ```bash
+     .\env\Scripts\activate
+     ```
+   - **En macOS/Linux**:
+     ```bash
+     source env/bin/activate
+     ```
+
+3. Instala las dependencias necesarias que están listadas en el archivo `requirements.txt`:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Paso 3: Ejecutar la API
+1. Con el entorno virtual activado, ejecuta la API con el siguiente comando:
+   ```bash
+   uvicorn api:app --reload
+   ```
+
+2. Verás un mensaje indicando que la API está corriendo en:
+   ```
+   http://127.0.0.1:8000
+   ```
+
+   Puedes colocar ´http://127.0.0.1:8000/docs´ para interactuar con la API o usar herramientas como Thunder Client para probar las solicitudes.
+
+### Paso 4: Probar la API con Thunder Client
+Usaremos la extensión **Thunder Client** de Visual Studio Code para interactuar con la API.
+
+1. Abre **Thunder Client** en Visual Studio Code y crea una nueva solicitud POST.
+2. Usa la siguiente URL para abrir el menú principal del juego:
+   ```
+   http://127.0.0.1:8000/open_menu
+   ```
+![imagen](capturas/imagen2.png)
+![imagen](capturas/imagen3.png)
+### Mover las Naves
+Para mover las naves, haz una solicitud POST a la API con los siguientes parámetros:
+
+- **URL**:
+  ```
+  http://127.0.0.1:8000/move
+  ```
+
+- **Cuerpo de la solicitud (JSON)**:
+  ```json
+  {
+    "player": 1,
+    "direction": "left"  // o "right"
+  }
+  ```
+
+Esto moverá la nave del jugador 1 en la dirección especificada. Si deseas mover la nave del jugador 2, reemplaza `"player": 1` con `"player": 2`.
+
+Instamos en utilizar la interfaz grafica para una mejor desenvolvimiento en el juego. 
+### Controles de Teclado
+También puedes mover las naves en la interfaz gráfica del juego usando las teclas del teclado:
+
+- **Nave 1**: Usa las teclas `A` para moverte a la izquierda y `D` para moverte a la derecha.
+- **Nave 2**: Usa las flechas de dirección: `←` para la izquierda y `→` para la derecha.
+
+### Reiniciar el Juego
+Para reiniciar el juego, simplemente envía otra solicitud POST a:
+```
+http://127.0.0.1:8000/open_menu
+```
+
+### Explorar más funcionalidades
+Además de abrir el menú y mover las naves, puedes consultar estadísticas o cerrar el juego con las siguientes rutas de la API:
+
+- **Ver estadísticas**: 
+  ```
+  http://127.0.0.1:8000/open_stats
+  ```
+
+- **Cerrar el juego**: 
+  ```
+  http://127.0.0.1:8000/close
+  ```
+
+
+## Practica Calificada 1 
+
+### Control de naves espaciales con la API (3 puntos) 
+
+Para esta seccion controlaremos las naves a traves de la API creada, utilizaremos thunder Client para hacer nuestras requests, esta es una extension de Vscode. 
+
+creamos la API: 
+
+![imagen](capturas/imagen1.png)
+
+Iniciando el juego a traves de la API: 
+
+![imagen](capturas/imagen2.png)
+
+Abrimos el menu: 
+
+![imagen](capturas/imagen3.png)
+
+Iniciamos el juego: 
+
+![imagen](capturas/imagen4.png)
+
+
+
+
+
+
+
