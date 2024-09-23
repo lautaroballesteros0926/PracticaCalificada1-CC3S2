@@ -202,7 +202,6 @@ class Game:
     
             
     def stats_screen(self):
-        # Hacer la petición a la API solo una vez
         api_url = "http://localhost:8000/games"
         response = requests.get(api_url)
         games = response.json()
