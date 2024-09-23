@@ -217,8 +217,8 @@ Usaremos la extensión **Thunder Client** de Visual Studio Code para interactuar
    ```
    http://127.0.0.1:8000/open_menu
    ```
-![imagen](capturas/imagen2.png)
-![imagen](capturas/imagen3.png)
+![imagen](Capturas/imagen2.png)
+![imagen](Capturas/imagen3.png)
 ### Mover las Naves
 Para mover las naves, haz una solicitud POST a la API con los siguientes parámetros:
 
@@ -272,19 +272,19 @@ Para esta seccion controlaremos las naves a traves de la API creada, utilizaremo
 
 creamos la API: 
 
-![imagen](capturas/imagen1.png)
+![imagen](Capturas/imagen1.png)
 
 Iniciando el juego a traves de la API: 
 
-![imagen](capturas/imagen2.png)
+![imagen](Capturas/imagen2.png)
 
 Abrimos el menu: 
 
-![imagen](capturas/imagen3.png)
+![imagen](Capturas/imagen3.png)
 
 Iniciamos el juego: 
 
-![imagen](capturas/imagen4.png)
+![imagen](Capturas/imagen4.png)
 
 
 
