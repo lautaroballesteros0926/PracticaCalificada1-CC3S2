@@ -44,19 +44,20 @@ def mostrar_menu():
 def main():
     controller=1
     while True:
-        while controller==1:
-            inicio =input("Presione 1 para abrir el juego")
-            if inicio == 1:
+        if controller == 1:
+            inicio = input("Presione 1 para abrir el juego: ")
+            if inicio == '1':
                 open_game()
-                controller=2
+                controller = 2
 
-        controller=1
-        while controller == 1:
-                inicio =input("Presione 1 para iniciar el juego")
-                if inicio == 1:
-                    start_game()
-                    controller=2
-
+        if controller == 2:
+            inicio = input("Presione 1 para iniciar el juego o 0 para salir: ")
+            if inicio == '1':
+                start_game()
+                controller = 3  # Pasamos al estado del juego en curso
+            elif inicio == '0':
+                print("Saliendo del juego...")
+                break  # Salimos del ciclo principal
 
         while True:
             mostrar_menu()

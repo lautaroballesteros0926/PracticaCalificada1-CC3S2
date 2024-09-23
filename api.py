@@ -5,7 +5,8 @@ from gamestats import Session,GameStats
 import pygame
 import uvicorn
 from typing import List
-# Inicializamos FastAPI y el juego
+import threading
+# Inicializamos FastAPI y el juego  
 app = FastAPI()
 pygame.init()
 
@@ -13,6 +14,9 @@ pygame.init()
 class MoveRequest(BaseModel):
     player: int
     direction: str  # "left" o "right"
+
+# Inicializa el objeto de bloqueo
+lock = threading.Lock()
 
 def run_game(a):
     global game
@@ -27,8 +31,10 @@ def run_game(a):
 # Endpoint para iniciar el juego
 @app.post("/open_menu")
 def open():
-    run_game(1)
-    return {"message": "Menu Abierto"}
+    # Correr el juego en un hilo separado
+    thread = threading.Thread(target=run_game, args=(1,))   
+    thread.start()  # Inicia el hilo que ejecuta el menú
+    return {"message": "Menu Abierto"}  # Retorna la respuesta inmediatamente
 
 @app.post("/open_stats")
 def open(): 
@@ -36,28 +42,30 @@ def open():
     return  {"message": "Stats abierto"}
     
 @app.post("/start_game")
-def open():
-    run_game(3)
+def start_game():
+    thread = threading.Thread(target=run_game, args=(3,))
+    thread.start()  # Inicia el hilo para iniciar el juego
     return {"message": "Juego iniciado"}
 
-# Endpoint para mover la nave
 @app.post("/move")
 def move_ship(move_request: MoveRequest):
+    global game  # Asegúrate de que estás accediendo a la instancia global del juego
     player = move_request.player
     direction = move_request.direction
 
-    if player == 1:
-        if direction == 'left':
-            game.player1.move(-5, 0)
-        elif direction == 'right':
-            game.player1.move(5, 0)
-    elif player == 2:
-        if direction == 'left':
-            game.player2.move(-5, 0)
-        elif direction == 'right':
-            game.player2.move(5, 0)
-    else:
-        raise HTTPException(status_code=400, detail="Jugador inválido")
+    with lock:  # Usa el lock para evitar condiciones de carrera
+        if player == 1:
+            if direction == 'left':
+                game.player1.move(-5, 0)
+            elif direction == 'right':
+                game.player1.move(5, 0)
+        elif player == 2:
+            if direction == 'left':
+                game.player2.move(-5, 0)
+            elif direction == 'right':
+                game.player2.move(5, 0)
+        else:
+            raise HTTPException(status_code=400, detail="Jugador inválido")
 
     return {"message": "Movimiento realizado"}
 
@@ -78,23 +86,6 @@ def get_status(player: int):
         "position": position,
         "collisions": collisions
     }
-
-""""
-@app.get("/stats")
-def get_stats():
-    session = Session()
-    stats = session.query(GameStats).all()
-    session.close()
-    
-    return [{"game_id": stat.id,  # Añadir el número de juego (ID)
-             "player1_collisions": stat.player1_collisions, 
-             "player2_collisions": stat.player2_collisions, 
-             "winner": stat.winner, 
-             "score_player1": stat.score_player1, 
-             "score_player2": stat.score_player2} for stat in stats]
-"""
-
-
 
 # Endpoint para cerrar el juego
 @app.post("/close")
