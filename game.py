@@ -17,6 +17,7 @@ class Game:
         self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
         self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
         # grupo de sprites
+        self.controller = 0
         self.coins = pygame.sprite.Group()
         self.meteorites = pygame.sprite.Group()
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
@@ -39,20 +40,39 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            self.handle_input()
-            self.update()
-            self.draw()
-            # Se detendrá el juego si uno de los jugadores llega a 100 o si ambos pierden todas sus vidas
-            if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
-                print('Ingresando al menú de finalización')
-                self.end_game() #Guarda estadisticas del juego
-                self.send_game_data(self.player1.score, self.player2.score, self.winner)
-                self.end_screen()
-                # Al finalizar el juego
-                # Al finalizar el juego               
-                running = False  # detiene el bucle del juego
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # 1 es el botón izquierdo del ratón
+                        # Obtener la posición del clic
+                        mouse_pos = pygame.mouse.get_pos()
+                        # Verificar si el clic ocurrió dentro del área del botón
+                        if self.buttom_rect_start.collidepoint(mouse_pos):
+                            # entra al juego directamente
+                            self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                            self.controller=2
+                            # cerramos si cierras la ventana en loop
+                        if self.buttom_rect_stats.collidepoint(mouse_pos):
+                            self.stats_screen()
 
-
+            if self.controller == 1:
+                self.player1.score=0
+                self.player2.score=0
+                self.collision_count_p1=0
+                self.collision_count_p2=0
+                self.draw_menu()
+            else:
+                if self.controller ==2:
+                    self.handle_input()
+                    self.update()
+                    self.draw()
+                
+                if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
+                    self.controller=100
+                    print('Ingresando al menú de finalización')
+                    self.end_game() #Guarda estadisticas del juego
+                    self.send_game_data(self.player1.score, self.player2.score, self.winner)
+                    self.end_screen()
+                    # Al finalizar el juego
+                    # Al finalizar el juego               
             self.clock.tick(60)
     
     # Controla las teclas para players 
@@ -147,28 +167,22 @@ class Game:
     # Creacion del menu
 
     def main_menu(self):
-        runing = True
-        while runing:
-            self.draw_menu()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    runing = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # 1 es el botón izquierdo del ratón
-                        # Obtener la posición del clic
-                        mouse_pos = pygame.mouse.get_pos()
-                        # Verificar si el clic ocurrió dentro del área del botón
-                        if self.buttom_rect_start.collidepoint(mouse_pos):
-                            # entra al juego directamente
-                            self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                            self.loop()
-                            # cerramos si cierras la ventana en loop
-                            runing = False
-                        if self.buttom_rect_off.collidepoint(mouse_pos):
-                            # cerramos la ventana
-                            runing = False
-                        if self.buttom_rect_stats.collidepoint(mouse_pos):
-                            self.stats_screen()
+
+        self.draw_menu()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # 1 es el botón izquierdo del ratón
+                    # Obtener la posición del clic
+                    mouse_pos = pygame.mouse.get_pos()
+                    # Verificar si el clic ocurrió dentro del área del botón
+                    if self.buttom_rect_start.collidepoint(mouse_pos):
+                        # entra al juego directamente
+                        self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                        self.loop()
+                        # cerramos si cierras la ventana en loop
+
+                    if self.buttom_rect_stats.collidepoint(mouse_pos):
+                        self.stats_screen()
 
                             
     def draw_menu(self): 

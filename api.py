@@ -17,6 +17,10 @@ class MoveRequest(BaseModel):
     player: int
     direction: str  # "left" o "right"
 
+class GameController(BaseModel):
+    option: int
+
+
 def run_game(a):
     global game
     game=Game()
@@ -27,10 +31,13 @@ def run_game(a):
     else: 
         game.loop()
 
+
+
 # Endpoint para iniciar el juego
-@app.post("/open_menu")
-def open():
-    run_game(1)
+@app.post("/option")
+def optionMenu( game_controller : GameController):
+    option = game_controller.option
+    game.controller = option
     return {"message": "Menu Abierto"}
 
 @app.post("/open_stats")
@@ -39,10 +46,11 @@ def open():
     return  {"message": "Stats abierto"}
     
 @app.post("/start_game")
-def open():
-    run_game(3)
-    return {"message": "Juego iniciado"}
-
+def openjuego():
+    global game
+    game=Game()
+    game.loop()
+    return{"message":"Interfaz Abierta"}
 # Endpoint para mover la nave
 @app.post("/move")
 def move_ship(move_request: MoveRequest):
