@@ -1,17 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends,FastAPI, HTTPException
 from pydantic import BaseModel
 from game import Game  # Importamos tu código de la clase Game
-from gamestats import Session,GameStats
 import pygame
 import uvicorn
 from typing import List
 from prometheus_fastapi_instrumentator import Instrumentator
+from database import engine,get_db
+from sqlalchemy.orm import Session
+from models import Base,GameStats
 # Inicializamos FastAPI y el juego
-app = FastAPI()
+app = FastAPI() 
+
+Base.metadata.create_all(bind=engine)
+
 pygame.init()
 
 Instrumentator().instrument(app).expose(app)
-
 # Modelo para mover las naves
 class MoveRequest(BaseModel):
     player: int
@@ -20,17 +24,12 @@ class MoveRequest(BaseModel):
 class GameController(BaseModel):
     option: int
 
-
-def run_game(a):
-    global game
-    game=Game()
-    if a==1:
-        game.main_menu()  # Inicia el menú principal del juego
-    elif a==2: 
-        game.stats_screen()
-    else: 
-        game.loop()
-
+class GameStatsCreate(BaseModel):
+    player1_collisions: int
+    player2_collisions: int
+    winner: str
+    score_player1: int
+    score_player2: int
 
 
 # Endpoint para iniciar el juego
@@ -40,10 +39,7 @@ def optionMenu( game_controller : GameController):
     game.controller = option
     return {"message": "Menu Abierto"}
 
-@app.post("/open_stats")
-def open(): 
-    run_game(2)
-    return  {"message": "Stats abierto"}
+
     
 @app.post("/open_menu")
 def openjuego():
@@ -144,6 +140,31 @@ def get_games():
     Retorna todas las partidas anteriores.
     """
     return games
+
+
+@app.get("/stats")
+def get_stats(db: Session = Depends (get_db)):
+    return db.query(GameStats).all()
+
+
+
+# Endpoint para guardar estadísticas del juego
+@app.post("/stats")
+def save_stats(
+    stats: GameStatsCreate,  # Cambiar a usar el modelo
+    db: Session = Depends(get_db)
+):
+    new_stat = GameStats(
+        player1_collisions=stats.player1_collisions,
+        player2_collisions=stats.player2_collisions,
+        winner=stats.winner,
+        score_player1=stats.score_player1,
+        score_player2=stats.score_player2
+    )
+    db.add(new_stat)
+    db.commit()
+    db.refresh(new_stat)
+    return new_stat
 
 # Ejecutar el servidor usando uvicorn
 if __name__ == "__main__":
