@@ -45,7 +45,7 @@ def open():
     run_game(2)
     return  {"message": "Stats abierto"}
     
-@app.post("/start_game")
+@app.post("/open_menu")
 def openjuego():
     global game
     game=Game()
