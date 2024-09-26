@@ -58,18 +58,17 @@ def move_ship(move_request: MoveRequest):
     player = move_request.player
     direction = move_request.direction
 
-    with lock:  # Usa el lock para evitar condiciones de carrera
-        if player == 1:
-            if direction == 'left':
-                game.player1.move(-5, 0)
-            elif direction == 'right':
-                game.player1.move(5, 0)
-        elif player == 2:
-            if direction == 'left':
-                game.player2.move(-5, 0)
-            elif direction == 'right':
-                game.player2.move(5, 0)
-        else:
+    if player == 1:
+        if direction == 'left':
+            game.player1.move(-5, 0)
+        elif direction == 'right':
+            game.player1.move(5, 0)
+    elif player == 2:
+        if direction == 'left':
+            game.player2.move(-5, 0)
+        elif direction == 'right':
+            game.player2.move(5, 0)
+    else:
             raise HTTPException(status_code=400, detail="Jugador inválido")
 
     return {"message": "Movimiento realizado"}

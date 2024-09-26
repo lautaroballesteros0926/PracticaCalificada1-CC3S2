@@ -5,7 +5,7 @@ API_URL = "http://localhost:8000"  # Cambia esto por el endpoint de tu API
 
 # Función para mover jugadores
 def mover_jugador(player_id, direction):
-    data = {"player_id": player_id, "direction": direction}
+    data = {"player": player_id, "direction": direction}
     response = requests.post(f"{API_URL}/move", json=data)  # Llamada POST a la API para mover al jugador
     return response.json()
 
@@ -22,9 +22,10 @@ def open_game():
     else:
         print("Error al abrir el juego.")
 
-def start_game():
+def start_game(option):
     # Lógica para iniciar el juego mediante una solicitud a la API
-    response = requests.post("http://localhost:8000/start_game")
+    data = {"option": option}
+    response = requests.post("http://localhost:8000/option",json=data)
     if response.status_code == 200:
         print("Juego iniciado correctamente.")
     else:
@@ -42,19 +43,12 @@ def mostrar_menu():
 
 # Función principal que maneja el ciclo
 def main():
-    controller=1
+    controller=2
     while True:
-        if controller == 1:
-            inicio = input("Presione 1 para abrir el juego: ")
-            if inicio == '1':
-                open_game()
-                controller = 2
-
         if controller == 2:
-            inicio = input("Presione 1 para iniciar el juego o 0 para salir: ")
-            if inicio == '1':
-                start_game()
-                controller = 3  # Pasamos al estado del juego en curso
+            inicio = input("Presione 2 para iniciar el juego o 0 para salir: ")
+            if inicio == '2':
+                start_game(2) 
             elif inicio == '0':
                 print("Saliendo del juego...")
                 break  # Salimos del ciclo principal
@@ -75,12 +69,14 @@ def main():
                             posiciones = obtener_posiciones()  # Obtener posiciones de los jugadores
                             print(f"Coordenadas actuales:\nJugador 1: {posiciones['player1']}\nJugador 2: {posiciones['player2']}")
             elif opcion == '6':
-                            print("Saliendo del juego...")
+                            print("Volver al menu principal")
+                            start_game(1)
+                            controller=2
                             break
             else:
                             print("Opción inválida. Intenta de nuevo.")
             
-        controller=1
+        
 
 
 
