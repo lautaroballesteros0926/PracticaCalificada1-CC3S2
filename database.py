@@ -2,7 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker,Session
 
-SQlALCHEMY_DATABASE_URL="postgresql://postgres:alice@localhost/pygame"
+database = "localhost"
+#Referencia al servidor de la base de datos
+SQlALCHEMY_DATABASE_URL = f"postgresql://postgres:alice@{database}:5432/pygame"
 
 # Crear el motor de SQLAlchemy para la conexión
 engine = create_engine(SQlALCHEMY_DATABASE_URL)

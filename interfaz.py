@@ -16,7 +16,7 @@ def obtener_posiciones():
 
 def open_game():
     # Lógica para abrir el juego mediante una solicitud a la API
-    response = requests.post("http://localhost:8000/open_menu")
+    response = requests.post(API_URL)
     if response.status_code == 200:
         print("Juego abierto correctamente.")
     else:
@@ -25,7 +25,7 @@ def open_game():
 def start_game(option):
     # Lógica para iniciar el juego mediante una solicitud a la API
     data = {"option": option}
-    response = requests.post("http://localhost:8000/option",json=data)
+    response = requests.post(f"{API_URL}/option",json=data)
     if response.status_code == 200:
         print("Juego iniciado correctamente.")
     else:
