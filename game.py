@@ -1,13 +1,18 @@
 import pygame
+from fastapi import Depends
 from background import Background
 from players import Player
 from coin import Coin
 from meteorite import Meteorite
+from models import GameStats
 #from gamestats import GameStats,Session
 #from sqlalchemy import create_engine
 #from sqlalchemy.ext.declarative import declarative_base
 #from sqlalchemy.orm import sessionmaker
 import requests 
+from database import engine,get_db
+from models import Base,GameStats
+from sqlalchemy.orm import Session
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
@@ -17,6 +22,7 @@ class Game:
         self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
         self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
         # grupo de sprites
+        self.controller = 1
         self.coins = pygame.sprite.Group()
         self.meteorites = pygame.sprite.Group()
         self.font = pygame.font.Font(None, 36)  # Fuente por defecto, tamaño 36
@@ -39,22 +45,86 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            self.handle_input()
-            self.update()
-            self.draw()
-            # Se detendrá el juego si uno de los jugadores llega a 100 o si ambos pierden todas sus vidas
-            if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
-                print('Ingresando al menú de finalización')
-                self.end_game() #Guarda estadisticas del juego
-                self.send_game_data(self.player1.score, self.player2.score, self.winner)
-                self.end_screen()
-                # Al finalizar el juego
-                # Al finalizar el juego               
-                running = False  # detiene el bucle del juego
+                if self.controller==1:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:  # 1 es el botón izquierdo del ratón
+                            # Obtener la posición del clic
+                            mouse_pos = pygame.mouse.get_pos()
+                            # Verificar si el clic ocurrió dentro del área del botón
+                            if self.buttom_rect_start.collidepoint(mouse_pos):
+                                # entra al juego directamente
+                                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                                self.controller=2
+                                # cerramos si cierras la ventana en loop
+                            if self.buttom_rect_stats.collidepoint(mouse_pos):
+                                self.stats_screen()
+                            if self.buttom_rect_off.collidepoint(mouse_pos):
+                                self.controller=1
+                else:
+                    if self.controller==3:
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            if event.button == 1:  # 1 es el botón izquierdo del ratón
+                                # Obtener la posición del clic
+                                mouse_pos = pygame.mouse.get_pos()
+                                # Verificar si el clic ocurrió dentro del área del botón
+                                if self.button_rect_restart.collidepoint(mouse_pos):
+                                    self.controller=1
 
 
+            if self.controller == 1:
+                self.player1.score=0
+                self.player2.score=0
+                self.collision_count_p1=0
+                self.collision_count_p2=0
+                self.draw_menu()
+            else:
+                if self.controller == 2:
+                    self.handle_input()
+                    self.update()
+                    self.draw()
+                
+                if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
+                    self.controller=3
+                    print('Ingresando al menú de finalización')
+                    self.end_game() #Determina el ganador
+                    self.game_over()
+                    self.end_screen()
+                    self.collision_count_p1=0
+                    self.collision_count_p2=0
+                    self.player1.score=0
+                    self.player2.score=0
+                    # Al finalizar el juego
+                    # Al finalizar el juego               
             self.clock.tick(60)
     
+
+    def game_over(self):
+        
+        player1_colision=int(self.collision_count_p1)
+        player2_colision=int(self.collision_count_p2)
+        winner=str(self.winner)
+        score_player1=int(self.player1.score)
+        score_player2=int(self.player2.score)
+        
+        url = "http://localhost:8000/stats"
+        data = {
+            "player1_collisions": player1_colision,
+            "player2_collisions": player2_colision,
+            "winner": winner,
+            "score_player1": score_player1,
+            "score_player2": score_player2
+        }
+
+        response = requests.post(url, json=data)
+        try:
+            response = requests.post(url, json=data)
+            response.raise_for_status()  # Lanza una excepción para códigos de estado 4xx y 5xx
+            print("Datos guardados con éxito:", response.json())
+        except requests.exceptions.RequestException as e:
+            print(f"Error al enviar los datos: {e}")
+
+
+
     # Controla las teclas para players 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -147,28 +217,22 @@ class Game:
     # Creacion del menu
 
     def main_menu(self):
-        runing = True
-        while runing:
-            self.draw_menu()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    runing = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # 1 es el botón izquierdo del ratón
-                        # Obtener la posición del clic
-                        mouse_pos = pygame.mouse.get_pos()
-                        # Verificar si el clic ocurrió dentro del área del botón
-                        if self.buttom_rect_start.collidepoint(mouse_pos):
-                            # entra al juego directamente
-                            self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                            self.loop()
-                            # cerramos si cierras la ventana en loop
-                            runing = False
-                        if self.buttom_rect_off.collidepoint(mouse_pos):
-                            # cerramos la ventana
-                            runing = False
-                        if self.buttom_rect_stats.collidepoint(mouse_pos):
-                            self.stats_screen()
+
+        self.draw_menu()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # 1 es el botón izquierdo del ratón
+                    # Obtener la posición del clic
+                    mouse_pos = pygame.mouse.get_pos()
+                    # Verificar si el clic ocurrió dentro del área del botón
+                    if self.buttom_rect_start.collidepoint(mouse_pos):
+                        # entra al juego directamente
+                        self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                        self.loop()
+                        # cerramos si cierras la ventana en loop
+
+                    if self.buttom_rect_stats.collidepoint(mouse_pos):
+                        self.stats_screen()
 
                             
     def draw_menu(self): 
@@ -219,7 +283,7 @@ class Game:
         pygame.display.set_caption("Estadísticas")
         
         # Cargar la imagen de fondo
-        background_image = pygame.image.load("sprites/fondo_espacial.jpg")
+        background_image = pygame.image.load("sprites/fondo_espacial.png")
         self.screen.blit(background_image, (0, 0))
         
         # Configurar la fuente para mostrar el texto en pantalla
@@ -252,14 +316,9 @@ class Game:
     
     def end_screen(self):
         print('Ingreso')
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                # Dibujar la pantalla de finalización
-                self.draw_end_screen()
-                pygame.display.flip()
+        # Dibujar la pantalla de finalización
+        self.draw_end_screen()
+        pygame.display.flip()
     
     def draw_end_screen(self):
         # Fondo de la pantalla de finalización
@@ -269,15 +328,16 @@ class Game:
         # Dibujar los botones de reiniciar y volver al menú
         button_restart = pygame.image.load("sprites/boton_off.png")
         button_menu = pygame.image.load("sprites/boton_menu.png")
+    
 
         self.button_rect_restart = button_restart.get_rect()
         self.button_rect_restart.topleft = (300, 500)
         self.button_rect_menu = button_menu.get_rect()
-        self.button_rect_menu.topleft = (300, 550)
+        self.button_rect_menu.topleft = (400, 500)
 
         # Mostrar los botones en la pantalla
         self.screen.blit(button_restart, self.button_rect_restart.topleft)
-        self.screen.blit(button_menu, self.button_rect_menu.topleft)
+        
 
         # Título de "Game Over" o similar
         font = pygame.font.Font(None, 57)
