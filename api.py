@@ -1,51 +1,60 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends,FastAPI, HTTPException
 from pydantic import BaseModel
 from game import Game  # Importamos tu código de la clase Game
-from gamestats import Session,GameStats
 import pygame
 import uvicorn
 from typing import List
+
 from prometheus_fastapi_instrumentator import Instrumentator
+from database import engine,get_db
+from sqlalchemy.orm import Session
+from models import Base,GameStats
 # Inicializamos FastAPI y el juego
-app = FastAPI()
+app = FastAPI() 
+
+Base.metadata.create_all(bind=engine)
+
+
 pygame.init()
 
 Instrumentator().instrument(app).expose(app)
-
 # Modelo para mover las naves
 class MoveRequest(BaseModel):
     player: int
     direction: str  # "left" o "right"
 
-def run_game(a):
-    global game
-    game=Game()
-    if a==1:
-        game.main_menu()  # Inicia el menú principal del juego
-    elif a==2: 
-        game.stats_screen()
-    else: 
-        game.loop()
+
+class GameController(BaseModel):
+    option: int
+
+class GameStatsCreate(BaseModel):
+    player1_collisions: int
+    player2_collisions: int
+    winner: str
+    score_player1: int
+    score_player2: int
+
 
 # Endpoint para iniciar el juego
-@app.post("/open_menu")
-def open():
-    run_game(1)
+@app.post("/option")
+def optionMenu( game_controller : GameController):
+    option = game_controller.option
+    game.controller = option
     return {"message": "Menu Abierto"}
 
-@app.post("/open_stats")
-def open(): 
-    run_game(2)
-    return  {"message": "Stats abierto"}
-    
-@app.post("/start_game")
-def open():
-    run_game(3)
-    return {"message": "Juego iniciado"}
 
+    
+@app.post("/open_menu")
+def openjuego():
+    global game
+    game=Game()
+    game.loop()
+    return{"message":"Interfaz Abierta"}
 # Endpoint para mover la nave
+
 @app.post("/move")
 def move_ship(move_request: MoveRequest):
+    global game  # Asegúrate de que estás accediendo a la instancia global del juego
     player = move_request.player
     direction = move_request.direction
 
@@ -60,7 +69,7 @@ def move_ship(move_request: MoveRequest):
         elif direction == 'right':
             game.player2.move(5, 0)
     else:
-        raise HTTPException(status_code=400, detail="Jugador inválido")
+            raise HTTPException(status_code=400, detail="Jugador inválido")
 
     return {"message": "Movimiento realizado"}
 
@@ -82,34 +91,6 @@ def get_status(player: int):
         "collisions": collisions
     }
 
-""""
-@app.get("/stats")
-def get_stats():
-    session = Session()
-    stats = session.query(GameStats).all()
-    session.close()
-    
-    return [{"game_id": stat.id,  # Añadir el número de juego (ID)
-             "player1_collisions": stat.player1_collisions, 
-             "player2_collisions": stat.player2_collisions, 
-             "winner": stat.winner, 
-             "score_player1": stat.score_player1, 
-             "score_player2": stat.score_player2} for stat in stats]
-"""
-
-
-
-# Endpoint para cerrar el juego
-@app.post("/close")
-def close_game():
-    global game
-    if not game:
-        raise HTTPException(status_code=400, detail="El juego no está iniciado")
-
-    pygame.quit()
-    game = None  # Reiniciar el estado del juego
-    return {"message": "Juego cerrado exitosamente"}
-
 
 
 # Guardar los datos del juego 
@@ -121,21 +102,53 @@ class GameData(BaseModel):
 
 # Base de datos simulada para almacenar las partidas
 games = []
-
+"""
 @app.post("/games")
 def create_game(game: GameData):
-    """
+
     Crea una nueva partida y la almacena.
-    """
+
     games.append(game)
     return {"message": "Partida almacenada exitosamente", "game": game}
 
 @app.get("/games", response_model=List[GameData])
 def get_games():
-    """
+
     Retorna todas las partidas anteriores.
-    """
+
     return games
+"""
+
+@app.get("/games")
+def get_stats(db: Session = Depends (get_db)):
+    return db.query(GameStats).all()
+
+
+
+# Endpoint para guardar estadísticas del juego
+@app.post("/stats")
+def save_stats(stats: GameStatsCreate,db: Session = Depends(get_db)):
+    new_stat = GameStats(
+        player1_collisions=stats.player1_collisions,
+        player2_collisions=stats.player2_collisions,
+        winner=stats.winner,
+        score_player1=stats.score_player1,
+        score_player2=stats.score_player2
+    )
+    db.add(new_stat)
+    db.commit()
+    db.refresh(new_stat)
+    return new_stat
+
+
+@app.get("/positions")
+def get_status():
+    position1 = game.player1.rect.x
+    position2 = game.player2.rect.x
+    return {
+        "player1 position": position1,
+        "player2 position": position2
+    }
 
 # Ejecutar el servidor usando uvicorn
 if __name__ == "__main__":

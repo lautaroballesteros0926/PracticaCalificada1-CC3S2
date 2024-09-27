@@ -1,15 +1,39 @@
 version: '3.8'
 
 services:
-  juego:
-    build: .
+  # Servicio de la API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_container
     ports:
       - "8000:8000"
+    depends_on:
+      - postgres_db  # Cambiado localhost por postgres_db
+    environment:
+      - DATABASE_URL=postgresql://postgres:alice@postgres_db:5432/pygame  # Cambiado localhost por postgres_db
     volumes:
       - .:/app
+    networks:
+      - app-network
+
+  # Servicio de la base de datos (PostgreSQL)
+  postgres_db:  # Cambiado el nombre del servicio de localhost a postgres_db
+    image: postgres:13
+    container_name: postgres_db
     environment:
-      - DISPLAY=:0  # Si necesitas usar la pantalla del host
-      
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: alice
+      POSTGRES_DB: pygame
+    ports:
+      - "5435:5432"  # Asegúrate de que este puerto no esté en uso
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # Servicio de Prometheus
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -19,20 +43,31 @@ services:
       - "9090:9090"
     networks:
       - monitoring
-  
+      - app-network
+
+  # Servicio de Grafana
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
-    networks:
-      - monitoring
     volumes:
       - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+      - app-network
 
+# Definir volúmenes para persistencia de datos
 volumes:
+  postgres_data:
   grafana-data:
-  
+
+# Definir redes
 networks:
+  app-network:
+    driver: bridge
   monitoring:
     driver: bridge
+
+
+
