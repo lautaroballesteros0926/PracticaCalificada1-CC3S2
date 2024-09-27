@@ -91,17 +91,6 @@ def get_status(player: int):
         "collisions": collisions
     }
 
-# Endpoint para cerrar el juego
-@app.post("/close")
-def close_game():
-    global game
-    if not game:
-        raise HTTPException(status_code=400, detail="El juego no está iniciado")
-
-    pygame.quit()
-    game = None  # Reiniciar el estado del juego
-    return {"message": "Juego cerrado exitosamente"}
-
 
 
 # Guardar los datos del juego 
@@ -150,6 +139,16 @@ def save_stats(stats: GameStatsCreate,db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_stat)
     return new_stat
+
+
+@app.get("/positions")
+def get_status():
+    position1 = game.player1.rect.x
+    position2 = game.player2.rect.x
+    return {
+        "player1 position": position1,
+        "player2 position": position2
+    }
 
 # Ejecutar el servidor usando uvicorn
 if __name__ == "__main__":

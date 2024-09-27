@@ -46,12 +46,9 @@ def main():
     controller=2
     while True:
         if controller == 2:
-            inicio = input("Presione 2 para iniciar el juego o 0 para salir: ")
+            inicio = input("Presione 2 para iniciar el juego ")
             if inicio == '2':
                 start_game(2) 
-            elif inicio == '0':
-                print("Saliendo del juego...")
-                break  # Salimos del ciclo principal
 
         while True:
             mostrar_menu()
@@ -67,7 +64,8 @@ def main():
                             mover_jugador(2, 'right')  # Mover jugador 2 a la derecha
             elif opcion == '5':
                             posiciones = obtener_posiciones()  # Obtener posiciones de los jugadores
-                            print(f"Coordenadas actuales:\nJugador 1: {posiciones['player1']}\nJugador 2: {posiciones['player2']}")
+                            print("Coordenadas actuales:\n")
+                            print(str(posiciones))
             elif opcion == '6':
                             print("Volver al menu principal")
                             start_game(1)

@@ -69,6 +69,8 @@ class Game:
                                 # Verificar si el clic ocurrió dentro del área del botón
                                 if self.button_rect_restart.collidepoint(mouse_pos):
                                     self.controller=1
+                                    self.player1.rect.centerx=600
+                                    self.player2.rect.centerx=200
 
 
             if self.controller == 1:
@@ -76,6 +78,7 @@ class Game:
                 self.player2.score=0
                 self.collision_count_p1=0
                 self.collision_count_p2=0
+                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
                 self.draw_menu()
             else:
                 if self.controller == 2:
@@ -87,8 +90,10 @@ class Game:
                     self.controller=3
                     print('Ingresando al menú de finalización')
                     self.end_game() #Determina el ganador
-                    self.game_over()
-                    self.end_screen()
+                    self.game_over() # Termina el juego #x y manda los datos a la base de datos
+                    self.end_screen() #
+                    self.player1.rect.centerx=600
+                    self.player2.rect.centerx=200
                     self.collision_count_p1=0
                     self.collision_count_p2=0
                     self.player1.score=0
