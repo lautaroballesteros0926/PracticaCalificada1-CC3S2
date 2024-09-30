@@ -1,5 +1,8 @@
 # Documentacion
 
+![imagen](Capturas/Imagen5.png)
+![imagen](Capturas/Imagen6.png)
+
 # Reglas del juego
 - El juego está diseñado para 2 jugadores.
 - El juego genera monedas, donde cada moneda aumenta el score del jugador en 20 puntos.
@@ -110,14 +113,20 @@ Esta API está diseñada para gestionar un juego de naves espaciales, donde los 
     ```json
     [
       {
-        "player1_score": 300,
-        "player2_score": 250,
-        "winner": "player1"
+        "id": 1,
+        "player1_collisions": 5,
+        "player2_collisions": 3,
+        "winner": "player1",
+        "score_player1": 150,
+        "score_player2": 100
       },
       {
-        "player1_score": 180,
-        "player2_score": 220,
-        "winner": "player2"
+        "id": 2,
+        "player1_collisions": 2,
+        "player2_collisions": 4,
+        "winner": "player2",
+        "score_player1": 200,
+        "score_player2": 250
       }
     ]
     
@@ -138,18 +147,6 @@ Esta API está diseñada para gestionar un juego de naves espaciales, donde los 
       "player2 position": 200
     }
     
-
----
-
-### 7. Cerrar el juego
-
-**Descripción**: Cierra el juego y libera los recursos de `pygame`.
-
-- **URL**: `/close`
-- **Método**: `POST`
-- **Respuesta**:
-  - `200 OK`: `{"message": "Juego cerrado exitosamente"}`
-  - `400 Bad Request`: `"El juego no está iniciado"`
 
 ---
 
@@ -187,8 +184,41 @@ Esta API está diseñada para gestionar un juego de naves espaciales, donde los 
    ```bash
    pip install -r requirements.txt
    ```
+### Paso 3: Tener PostgreSQL instalado 
+1. Para este punto es sumamente necesario tene instalado PostgreSQL y tener creada la base de datos ya que sin ello no podremos guardar las partidas jugadas. A continuacion una guia rápida para poder tener todo en orden: 
+  ```bash
+   sudo apt update
+   ```
+   ```bash
+   sudo apt install postgresql postgresql-contrib
+   ```
 
-### Paso 3: Ejecutar la API
+2. En este punto crearemos una constraseña para nuestro usuario postgres, entramos a PostgreSQL: 
+  ```bash
+   sudo -u postgres psql
+   ```
+   ```bash
+   \password postgres
+   ```
+  Colocamos una contraseña para usuario postgres, en nuestro caso escogimos la contraseña `postgres`. Tu podrias escoger la que desees pero tendrias que hacer un cambio en la clase `database.py` ya que es aqui donde se hace la conexion a nuestra base de datos. Observar que tenemos que cambiar la variable 'contraseña'. 
+
+  ![imagen](Capturas/Imagen7.png)
+
+3. Ya como paso final debemos crear la base de datos cuyo nombre es `pygame`. Para esto nos dirigimos a la consola de PostgreSQL. 
+
+  ```bash
+   sudo -u postgres psql
+  ```
+  Desde la consola de postgres, escribimos: 
+
+   ```bash
+   CREATE DATABASE pygame; 
+   ```
+  Veremos un mensaje que se creo nuestra base de de datos. Recuerda que puedes cambiar y ponerle el nombre que quieras pero tendrias que hacer cambios en `database.py`. Como se mostro en la imagen anterior. 
+
+  Listo, ! ya tendriamos todo para estar listo para jugar ! o al menos por ahora. 
+
+### Paso 4: Ejecutar la API
 1. Con el entorno virtual activado, ejecuta la API con el siguiente comando:
    ```bash
    uvicorn api:app --reload
@@ -199,7 +229,7 @@ Esta API está diseñada para gestionar un juego de naves espaciales, donde los 
    http://127.0.0.1:8000
    ```
 
-   Puedes colocar ´http://127.0.0.1:8000/docs´ para interactuar con la API o usar herramientas como Thunder Client para probar las solicitudes.
+   Puedes colocar ´http://127.0.0.1:8000/docs´ en tu navegador para interactuar con la API o usar herramientas como Thunder Client para probar las solicitudes.
 
 ### Paso 4: Probar la API con Thunder Client
 Usaremos la extensión **Thunder Client** de Visual Studio Code para interactuar con la API.
@@ -209,8 +239,14 @@ Usaremos la extensión **Thunder Client** de Visual Studio Code para interactuar
    ```
    http://127.0.0.1:8000/open_menu
    ```
-![imagen](Capturas/imagen2.png)
+![imagen](Capturas/Imagen2.png)
+
+Le damos a 'send' y la magia comienza: 
+
 ![imagen](Capturas/Imagen3.png)
+
+En este punto solo es necesario darle click al boton de start y comenzar a jugar. 
+
 ### Mover las Naves
 Para mover las naves, haz una solicitud POST a la API con los siguientes parámetros:
 
@@ -230,30 +266,36 @@ Para mover las naves, haz una solicitud POST a la API con los siguientes paráme
 Esto moverá la nave del jugador 1 en la dirección especificada. Si deseas mover la nave del jugador 2, reemplaza `"player": 1` con `"player": 2`.
 
 Instamos en utilizar la interfaz grafica para una mejor desenvolvimiento en el juego. 
+
 ### Controles de Teclado
 También puedes mover las naves en la interfaz gráfica del juego usando las teclas del teclado:
 
 - **Nave 1**: Usa las teclas `A` para moverte a la izquierda y `D` para moverte a la derecha.
 - **Nave 2**: Usa las flechas de dirección: `←` para la izquierda y `→` para la derecha.
 
+
 ### Reiniciar el Juego
 Para reiniciar el juego, simplemente envía otra solicitud POST a:
+
 ```
 http://127.0.0.1:8000/open_menu
 ```
 
-### Explorar más funcionalidades
-Además de abrir el menú y mover las naves, puedes consultar estadísticas o cerrar el juego con las siguientes rutas de la API:
+o en su defecto en la pantalla de finalizacion, dale click al boton de apagado y volveras al menu principal. 
 
-- **Ver estadísticas**: 
-  ```
-  http://127.0.0.1:8000/open_stats
-  ```
 
-- **Cerrar el juego**: 
-  ```
-  http://127.0.0.1:8000/close
-  ```
+### Paso 5 (Opcional): 
+En este punto desarrollamos una interfaz por comando en donde internamente se hacen las requests. Para probarla solo tienes que seguir los siguientes pasos: 
+
+1. Ejecuta la API con el siguiente comando:
+   ```bash
+   uvicorn api:app --reload
+   ```
+2. En otra terminal entra al directorio del proyecto donde tienes guardado y ejecuta el siguiente comando: 
+
+   ```bash
+   python interfaz.py 
+   ```
 
 
 ## Practica Calificada 1 
