@@ -12,9 +12,8 @@
 Esta API está diseñada para gestionar un juego de naves espaciales, donde los jugadores compiten para llegar a la meta evitando obstáculos. Se pueden realizar movimientos de las naves, consultar el estado del juego, y almacenar estadísticas y resultados de las partidas. Además, la API está instrumentada con Prometheus para monitorear métricas, como la velocidad de las naves y las colisiones.
 
 ## Base URL
-\`\`\`
-http://127.0.0.1:8000
-\`\`\`
+
+`http://127.0.0.1:8000`
 
 ---
 
@@ -38,12 +37,12 @@ http://127.0.0.1:8000
 - **URL**: `/move`
 - **Método**: `POST`
 - **Cuerpo**:
-  \`\`\`json
+  ```json
   {
     "player": 1, 
     "direction": "left"  // o "right"
   }
-  \`\`\`
+  ```
 - **Respuesta**:
   - `200 OK`: `{"message": "Movimiento realizado"}`
   - `400 Bad Request`: `"Jugador inválido"`
@@ -59,13 +58,13 @@ http://127.0.0.1:8000
 - **Parámetro de consulta**: `player` (número de jugador)
 - **Respuesta**:
   - `200 OK`: 
-    \`\`\`json
+    ```json
     {
       "player": 1,
       "position": 150,
       "collisions": 3
     }
-    \`\`\`
+    ```
   - `400 Bad Request`: `"Jugador inválido"`
 
 ---
@@ -77,7 +76,7 @@ http://127.0.0.1:8000
 - **URL**: `/stats`
 - **Método**: `POST`
 - **Cuerpo**:
-  \`\`\`json
+  ```json
   {
     "player1_collisions": 3,
     "player2_collisions": 2,
@@ -85,10 +84,10 @@ http://127.0.0.1:8000
     "score_player1": 100,
     "score_player2": 80
   }
-  \`\`\`
+
 - **Respuesta**:
   - `200 OK`: 
-    \`\`\`json
+    ```json
     {
       "player1_collisions": 3,
       "player2_collisions": 2,
@@ -96,7 +95,7 @@ http://127.0.0.1:8000
       "score_player1": 100,
       "score_player2": 80
     }
-    \`\`\`
+    
 
 ---
 
@@ -108,7 +107,7 @@ http://127.0.0.1:8000
 - **Método**: `GET`
 - **Respuesta**:
   - `200 OK`: 
-    \`\`\`json
+    ```json
     [
       {
         "player1_score": 300,
@@ -121,7 +120,7 @@ http://127.0.0.1:8000
         "winner": "player2"
       }
     ]
-    \`\`\`
+    
 
 ---
 
@@ -133,12 +132,12 @@ http://127.0.0.1:8000
 - **Método**: `GET`
 - **Respuesta**:
   - `200 OK`: 
-    \`\`\`json
+    ```json
     {
       "player1 position": 150,
       "player2 position": 200
     }
-    \`\`\`
+    
 
 ---
 
