@@ -302,27 +302,65 @@ En este punto desarrollamos una interfaz por comando en donde internamente se ha
 
 ### Control de naves espaciales con la API (3 puntos) 
 
-Para esta seccion controlaremos las naves a traves de la API creada, utilizaremos thunder Client para hacer nuestras requests, esta es una extension de Vscode. 
+El objetivo ya esta realizado, dejaremos como envidencia el control y monitoreo de las naves a traves de nuestra API. Para esta seccion controlaremos las naves a traves de la API creada, utilizaremos thunder Client para hacer nuestras requests, esta es una extension de Vscode. 
 
-creamos la API: 
-
+1. Ejecuta la API con el siguiente comando:
+   ```bash
+   uvicorn api:app --reload
+   ```
 ![imagen](Capturas/imagen1.png)
 
-Iniciando el juego a traves de la API: 
+Utilizaremos la extension de thunder Client para hacer las requests a nuestra API, observe: 
 
-![imagen](Capturas/imagen2.png)
+2. Usa la siguiente URL para abrir el menú principal del juego:
+   ```
+   http://127.0.0.1:8000/open_menu
+   ```
+![imagen](Capturas/Imagen2.png)
 
-Abrimos el menu: 
+Le damos a 'send' : 
 
 ![imagen](Capturas/Imagen3.png)
 
-Iniciamos el juego: 
+Podemos mover la nave a traves de una solictud post de la siguiente manera: 
 
-![imagen](Capturas/Imagen4.png)
+![imagen](Capturas/Imagen8.png)
+
+Vemos como respuesta de la solicitudo post, recordemos: 
+
+**Descripción**: Mueve la nave del jugador en la dirección especificada.
+
+- **URL**: `/move`
+- **Método**: `POST`
+- **Cuerpo**:
+  ```json
+  {
+    "player": 1, 
+    "direction": "left"  // o "right"
+  }
+  ```
+- **Respuesta**:
+  - `200 OK`: `{"message": "Movimiento realizado"}`
+  - `400 Bad Request`: `"Jugador inválido"`
+
+Como evidenciamos la respuesta : 
+
+![imagen](Capturas/Imagen9.png)
+
+Esto demuestra que el objetivo para esta pregunta ha sido cumplido. Tomar en cuenta la documentacion de los endpoints que sirve como guia para interactuar con nuestra API.
+
+### Monitorización del rendimiento de las naves (2 puntos)
 
 
 
 
 
+### Dockerización de la aplicación (3 puntos)
 
 
+
+### Simulación de obstáculos aleatorios en la carrera (2 puntos)
+
+
+
+### Resolver conflictos con Git Mergetool (3 puntos)
