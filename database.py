@@ -3,8 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker,Session
 
 database = "localhost"
+contraseña = "postgres" #contraseña de tu usuario postgres
 #Referencia al servidor de la base de datos
-SQlALCHEMY_DATABASE_URL = f"postgresql://postgres:alice@{database}:5432/pygame"
+SQlALCHEMY_DATABASE_URL = f"postgresql://postgres:{contraseña}@{database}:5432/pygame"
 
 # Crear el motor de SQLAlchemy para la conexión
 engine = create_engine(SQlALCHEMY_DATABASE_URL)

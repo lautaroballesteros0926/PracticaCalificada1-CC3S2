@@ -4,15 +4,7 @@ from background import Background
 from players import Player
 from coin import Coin
 from meteorite import Meteorite
-from models import GameStats
-#from gamestats import GameStats,Session
-#from sqlalchemy import create_engine
-#from sqlalchemy.ext.declarative import declarative_base
-#from sqlalchemy.orm import sessionmaker
 import requests 
-from database import engine,get_db
-from models import Base,GameStats
-from sqlalchemy.orm import Session
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
@@ -30,11 +22,11 @@ class Game:
         # Crear meteoritos
         for _ in range(2):
             meteorite = Meteorite()
-            self.meteorites.add(meteorite)
+            self.meteorites.add(meteorite) #añadimos meteoritos en el grupo de sprites 
         # Crear monedas
         for _ in range(3):
             coin = Coin()
-            self.coins.add(coin)
+            self.coins.add(coin)  # añdimos las monedas al grupo de sprites 
         # Fondo 
         self.background = Background() 
 
@@ -71,8 +63,6 @@ class Game:
                                     self.controller=1
                                     self.player1.rect.centerx=600
                                     self.player2.rect.centerx=200
-
-
             if self.controller == 1:
                 self.player1.score=0
                 self.player2.score=0
@@ -91,20 +81,19 @@ class Game:
                     print('Ingresando al menú de finalización')
                     self.end_game() #Determina el ganador
                     self.game_over() # Termina el juego #x y manda los datos a la base de datos
-                    self.end_screen() #
+                    self.end_screen() # pantalla final 
                     self.player1.rect.centerx=600
                     self.player2.rect.centerx=200
                     self.collision_count_p1=0
                     self.collision_count_p2=0
                     self.player1.score=0
                     self.player2.score=0
-                    # Al finalizar el juego
-                    # Al finalizar el juego               
+                    # Al finalizar el juego             
             self.clock.tick(60)
     
 
     def game_over(self):
-        
+
         player1_colision=int(self.collision_count_p1)
         player2_colision=int(self.collision_count_p2)
         winner=str(self.winner)
@@ -396,13 +385,3 @@ class Game:
         self.screen.blit(game_over_text, (200, 380))
 
         pygame.display.flip()
-
-    def send_game_data(self, player1_score, player2_score, winner):
-        api_url = "http://localhost:8000/games"
-        game_data = {
-            "player1_score": player1_score,
-            "player2_score": player2_score,
-            "winner": winner
-        }
-        response = requests.post(api_url, json=game_data)
-        print(response.json())

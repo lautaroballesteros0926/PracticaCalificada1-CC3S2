@@ -3,8 +3,6 @@ from pydantic import BaseModel
 from game import Game  # Importamos tu código de la clase Game
 import pygame
 import uvicorn
-from typing import List
-
 from prometheus_fastapi_instrumentator import Instrumentator
 from database import engine,get_db
 from sqlalchemy.orm import Session
@@ -91,39 +89,9 @@ def get_status(player: int):
         "collisions": collisions
     }
 
-
-
-# Guardar los datos del juego 
-
-class GameData(BaseModel):
-    player1_score: int
-    player2_score: int
-    winner: str
-
-# Base de datos simulada para almacenar las partidas
-games = []
-"""
-@app.post("/games")
-def create_game(game: GameData):
-
-    Crea una nueva partida y la almacena.
-
-    games.append(game)
-    return {"message": "Partida almacenada exitosamente", "game": game}
-
-@app.get("/games", response_model=List[GameData])
-def get_games():
-
-    Retorna todas las partidas anteriores.
-
-    return games
-"""
-
 @app.get("/games")
 def get_stats(db: Session = Depends (get_db)):
     return db.query(GameStats).all()
-
-
 
 # Endpoint para guardar estadísticas del juego
 @app.post("/stats")
