@@ -4,6 +4,7 @@ from background import Background
 from players import Player
 from coin import Coin
 from meteorite import Meteorite
+import prometheus_client
 import requests 
 class Game:
     def __init__(self):
@@ -13,6 +14,25 @@ class Game:
         self.player2 = Player('sprites/cohete2.png',200)
         self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
         self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
+
+        # Creamos las variables para mandar las stats al puerto de prometheus
+        self.p1_colision = prometheus_client.Counter(
+            "colisions_p1",
+            "colisiones del jugador 1"
+        )
+        self.p2_colision = prometheus_client.Counter(
+            "colisions_p2",
+            "colisiones del jugador 2"
+        )
+        self.p1_score = prometheus_client.Gauge(
+            "score_p1",
+            "score del jugador 1"
+        )
+        self.p2_score = prometheus_client.Gauge(
+            "score_p2",
+            "score del jugador 2"
+        )
+
         # grupo de sprites
         self.controller = 1
         self.coins = pygame.sprite.Group()
@@ -81,6 +101,7 @@ class Game:
                     print('Ingresando al menú de finalización')
                     self.end_game() #Determina el ganador
                     self.game_over() # Termina el juego #x y manda los datos a la base de datos
+                    self.metrics()
                     self.end_screen() # pantalla final 
                     self.player1.rect.centerx=600
                     self.player2.rect.centerx=200
@@ -91,7 +112,7 @@ class Game:
                     # Al finalizar el juego             
             self.clock.tick(60)
     
-
+    
     def game_over(self):
 
         player1_colision=int(self.collision_count_p1)
@@ -109,6 +130,7 @@ class Game:
             "score_player2": score_player2
         }
 
+
         response = requests.post(url, json=data)
         try:
             response = requests.post(url, json=data)
@@ -117,7 +139,9 @@ class Game:
         except requests.exceptions.RequestException as e:
             print(f"Error al enviar los datos: {e}")
 
-
+    def metrics(self):
+        url = "http://localhost:8000/metrics"
+        response = requests.get(url)
 
     # Controla las teclas para players 
     def handle_input(self):
@@ -157,9 +181,11 @@ class Game:
                 meteorite.reset_position()
             if player_num == 1:
                 self.collision_count_p1 += 1
+                self.p1_colision.inc()
                 print(f"Colisiones Jugador 1: {self.collision_count_p1}")
             else:
                 self.collision_count_p2 += 1
+                self.p2_colision.inc()
                 print(f"Colisiones Jugador 2: {self.collision_count_p2}")
         
         #colisiones entre monedas y player
@@ -169,8 +195,10 @@ class Game:
                 coin.reset_position()
             if player_num == 1:
                 self.player1.update_score()
+                self.p1_score.inc(20)
             else:
                 self.player2.update_score()
+                self.p2_score.inc(20)
 
 
 
