@@ -11,7 +11,6 @@ COPY . .
 # Instalar las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install prometheus-fastapi-instrumentator
 
 
 # Comando para ejecutar la aplicación

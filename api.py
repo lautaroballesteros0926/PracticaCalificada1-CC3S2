@@ -1,9 +1,9 @@
-from fastapi import Depends,FastAPI, HTTPException
+from fastapi import Depends,FastAPI, HTTPException, Response
 from pydantic import BaseModel
 from game import Game  # Importamos tu código de la clase Game
 import pygame
 import uvicorn
-from prometheus_fastapi_instrumentator import Instrumentator
+import prometheus_client
 from database import engine,get_db
 from sqlalchemy.orm import Session
 from models import Base,GameStats
@@ -15,7 +15,6 @@ Base.metadata.create_all(bind=engine)
 
 pygame.init()
 
-Instrumentator().instrument(app).expose(app)
 # Modelo para mover las naves
 class MoveRequest(BaseModel):
     player: int
@@ -107,6 +106,13 @@ def save_stats(stats: GameStatsCreate,db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_stat)
     return new_stat
+
+@app.get("/metrics")
+def get_metrics():
+    return Response(
+        content=prometheus_client.generate_latest(),
+        media_type="text/plain",
+    )
 
 
 @app.get("/positions")

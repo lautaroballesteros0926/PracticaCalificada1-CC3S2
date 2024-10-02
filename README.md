@@ -350,6 +350,51 @@ Como evidenciamos la respuesta :
 Esto demuestra que el objetivo para esta pregunta ha sido cumplido. Tomar en cuenta la documentacion de los endpoints que sirve como guia para interactuar con nuestra API.
 
 ### Monitorización del rendimiento de las naves (2 puntos)
+Para la monitorizacion de los eventos que suceden durante la partida hemos usado prometheus y grafana lo cual explicaremos como lo hemos implementado y como se veria el resultado.
+1. Primero creamos los contenedores en el archivo docker-compose.yml de prometheus y grafana en los puertos 9090 y 3000 respectivamente:
+   
+   ![image](https://github.com/user-attachments/assets/5ba76cf8-c4a9-4865-a886-b39a4cd74a68)
+
+2. Luego procedemos a configurar el Prometheus en el archivo prometheus.yml señalando que prometheus debe recolectar la informacion de las metricas de "/metrics":
+
+   ![image](https://github.com/user-attachments/assets/58f2110f-0004-4313-b572-affbd3f0bbfd)
+
+3. En el archivo game.py primero importamos la libreria prometheus_client, luego en el metodo constructor de la calse Game implementamos los atributos p1_colision y p2_colision tipo Counter (los cuales son la cantidad de colisiones de cada jugador) debido a que este tipo contador puede ser aumentado o actualizado a 0, en cambio los atributos p1_score y p2_score son tipo Gauge (los cuales son los score de cada jugador) debido a que pueden incrementar o disminuir su cifra.
+
+   ![image](https://github.com/user-attachments/assets/202b21c0-b1ae-4bde-b018-a7291974dde9)
+
+4. Luego procedo a implementar los contadores para que sigan el flujo de las colisiones y el score del juego, para los tipo Counter se uso self.p1_colision.inc() y para los tipo Gauge se uso self.p1_score(20)
+
+   ![image](https://github.com/user-attachments/assets/751efbb0-8a66-493f-af03-ec6834bdd51d)
+
+5. Luego creamos la funcion metrics para parar la url = "http://localhost:8000/metrics" que es donde se almacenara las metricas del juego y la que usara prometheus para el analisis aplicando un metodo get:
+
+   ![image](https://github.com/user-attachments/assets/cf543e3f-98e0-424e-b028-9fb444879bcb)
+
+6. Ahora en el archivo api.py creamos el metodo @app.get("/metrics") que mandara al puerto respetctivo las metricas:
+
+   ![image](https://github.com/user-attachments/assets/a9e9423a-7d95-4b7c-980f-31ec23c901f3)
+
+7. Ahora para correr todos los contenedores y comprobar la funcionabilidad escribiremos en la terminal sudo docker compose up --build
+
+   ![image](https://github.com/user-attachments/assets/8e5f647e-a776-4c87-b12a-6330e3fad155)
+
+8. Ahora una vez corramos el juego y haya concluido usando thunder client corremos el metodo get("/metrics") para mandar un archivo con todas las metricas al puerto respectivo:
+
+   ![image](https://github.com/user-attachments/assets/2c9ca502-2850-48be-9ce3-26eca6486843)
+
+9. En este url = http://127.0.0.1:8000/metrics podremos ver lo siguiente:
+    
+    ![image](https://github.com/user-attachments/assets/9cd53974-5882-4378-875c-6486356d7eb3)
+
+10. Ahora como hemos configurado prometheus, este recolectara la informacion de metrics para poder las metricas necesarias para mostrarlas en el puerto 9090, ademas en este caso podemos ver el score_p1, el cual es el score del jugador 1:
+
+    ![image](https://github.com/user-attachments/assets/504cb027-f285-4da1-be78-c30e4752b0d2)
+
+11. Ahora en grafana la cual esta en el puerto 3000 lo configuramos para que use como database el prometheus (http://prometheus:9090) y pueda usarse para hacer todo tipo dashboard para un mejor analisis de las metricas:
+
+    ![image](https://github.com/user-attachments/assets/1696bc4d-d9a6-4521-8280-a06fae8e329c)
+
 
 
 

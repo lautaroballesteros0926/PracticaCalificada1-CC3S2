@@ -1,8 +1,8 @@
 global:
-  scrape_interval: 15s  # Intervalo de recolección de métricas
+  scrape_interval: 1s  # Intervalo de recolección de métricas
 
 scrape_configs:
-  - job_name: 'fastapi-app'
-    metrics_path: '/games'
+  - job_name: 'api_container'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['fastapi-app:8000']
+      - targets: ['api_container:8000']

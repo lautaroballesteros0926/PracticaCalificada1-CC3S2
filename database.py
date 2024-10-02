@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker,Session
 
-database = "localhost"
+database = "postgres_db"
 contraseña = "postgres" #contraseña de tu usuario postgres
 #Referencia al servidor de la base de datos
 SQlALCHEMY_DATABASE_URL = f"postgresql://postgres:{contraseña}@{database}:5432/pygame"
