@@ -397,15 +397,13 @@ Para la monitorizacion de los eventos que suceden durante la partida hemos usado
 
 
 
-
-
-
 ### Dockerización de la aplicación (3 puntos)
+Se crean los 4 contenedores correspondientes (para la API, para la base de datos, Grafana y Prometheus): 
 
-
+![imagen](Capturas/Imagen10.png)
 
 ### Simulación de obstáculos aleatorios en la carrera (2 puntos)
 
-
+El objetivo para esta seccion esta cumplido ya que nuestro juego contaba con obstaculos para el movimiento de las naves. 
 
 ### Resolver conflictos con Git Mergetool (3 puntos)
