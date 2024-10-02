@@ -24,7 +24,7 @@ services:
     container_name: postgres_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: alice
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: pygame
     ports:
       - "5435:5432"  # Asegúrate de que este puerto no esté en uso
