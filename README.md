@@ -407,3 +407,14 @@ Se crean los 4 contenedores correspondientes (para la API, para la base de datos
 El objetivo para esta seccion esta cumplido ya que nuestro juego contaba con obstaculos para el movimiento de las naves. 
 
 ### Resolver conflictos con Git Mergetool (3 puntos)
+
+Nosotros hemos resuelto los conflictos que hemos tenido en las ramas en la misma github ya que eran necesarias para hacer un pull request de las siguientes ramas:
+
+![image](https://github.com/user-attachments/assets/a0e4f05c-9717-4253-a794-60724726f89d)
+
+![image](https://github.com/user-attachments/assets/ec5db748-fb3c-41ed-903b-1077a14a7bfb)
+
+
+
+
+
