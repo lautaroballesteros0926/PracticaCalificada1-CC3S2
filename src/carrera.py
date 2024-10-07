@@ -1,63 +1,47 @@
 import pygame
 
-class carrera:
-    def __init__(self):
-        pass
-    def draw(self, game):
-        # Dibuja el fondo
-        game.background.draw(self.screen)
-
-        #Dibuja los sprites si tienen puntaje menor a 100 y si aun tienen vidas 
-        if(game.player1.score < 100 and game.collision_count_p1<3): 
-            game.screen.blit(game.player1.image, game.player1.rect)
-        if(game.player2.score < 100 and self.collision_count_p2<3):
-            game.screen.blit(game.player2.image, game.player2.rect)
-
-        game.meteorites.draw(game.screen) # distinto porque es un grupo de sprites 
-        game.coins.draw(game.screen)
-        
-        # Mostrar contadores de colisiones
-        text_p1 = game.font.render(f"Score: {game.player1.score}", True, (255, 255, 255))
-        text_p2 = game.font.render(f"Score: {game.player2.score}", True, (255, 255, 255))
-        game.screen.blit(text_p1, (10, 10))
-        game.screen.blit(text_p2, (10, 40))
-
-        game.display_time()
-
-    #Actualiza todos los sprites 
-    def update(self,game):
-        
-        game.background.update()  # Actualiza el fondo
-        
-        # Actualizamos posiciones de los sprites 
-        
-        game.meteorites.update()
-        game.coins.update()
-
-        # Verificar colisiones si es que no llegan a 100 y aun no se le acaba las vida (maximo 3 choques)
-        if game.player1.score <100 and game.collision_count_p1<3:
-            game.check_collisions(game.player1, 1)
-
-        if game.player2.score <100 and game.collision_count_p2<3:
-            game.check_collisions(game.player2, 2)
+class Carrera:
+    def __init__(self, max_score=100, max_collisions=3):
+        self.max_score = max_score  # Puntaje máximo
+        self.max_collisions = max_collisions  # Máximo de colisiones permitidas
     
-    def draw(self,game):
+    def draw(self, game):
+        """Dibuja todos los elementos en pantalla durante la carrera."""
         # Dibuja el fondo
         game.background.draw(game.screen)
 
-        #Dibuja los sprites si tienen puntaje menor a 100 y si aun tienen vidas 
-        if(game.player1.score < 100 and game.collision_count_p1<3): 
+        # Dibuja los jugadores si tienen puntaje menor a max_score y colisiones menores a max_collisions
+        if game.player1.score < self.max_score and game.collision_count_p1 < self.max_collisions: 
             game.screen.blit(game.player1.image, game.player1.rect)
-        if(game.player2.score < 100 and game.collision_count_p2<3):
+        
+        if game.player2.score < self.max_score and game.collision_count_p2 < self.max_collisions:
             game.screen.blit(game.player2.image, game.player2.rect)
 
-        game.meteorites.draw(game.screen) # distinto porque es un grupo de sprites 
+        # Dibuja los grupos de meteoritos y monedas
+        game.meteorites.draw(game.screen)
         game.coins.draw(game.screen)
         
-        # Mostrar contadores de colisiones
+        # Mostrar contadores de puntaje
         text_p1 = game.font.render(f"Score: {game.player1.score}", True, (255, 255, 255))
         text_p2 = game.font.render(f"Score: {game.player2.score}", True, (255, 255, 255))
         game.screen.blit(text_p1, (10, 10))
         game.screen.blit(text_p2, (10, 40))
 
+        # Mostrar el tiempo restante o actual en la pantalla
         game.display_time()
+
+    def update(self, game):
+        """Actualiza los elementos de la carrera."""
+        # Actualiza el fondo
+        game.background.update()
+
+        # Actualiza los meteoritos y monedas
+        game.meteorites.update()
+        game.coins.update()
+        # Verificar colisiones y actualizaciones de puntaje si los jugadores no alcanzan el puntaje máximo y aún tienen vidas
+        if game.player1.score < self.max_score and game.collision_count_p1 < self.max_collisions:
+            game.check_collisions(game.player1, 1)
+
+        if game.player2.score < self.max_score and game.collision_count_p2 < self.max_collisions:
+            game.check_collisions(game.player2, 2)
+

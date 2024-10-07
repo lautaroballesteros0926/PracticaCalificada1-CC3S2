@@ -1,6 +1,6 @@
 from fastapi import Depends,FastAPI, HTTPException, Response
 from pydantic import BaseModel
-from game import Game  # Importamos tu código de la clase Game
+from src.game import Game  # Importamos tu código de la clase Game
 import pygame
 import uvicorn
 import prometheus_client

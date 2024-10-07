@@ -9,8 +9,10 @@ import requests
 
 # Nuevas clases 
 from event_handler import EventHandler
-from MainMenu import MainMenu 
-from carrera import carrera
+from main_menu import MainMenu 
+from carrera import Carrera
+from end_screen import EndScreen
+
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
@@ -23,7 +25,8 @@ class Game:
         # Nuevos Objetos 
         self.event_handler = EventHandler()
         self.main_menu = MainMenu()
-        self.start_carrera = carrera()
+        self.start_carrera = Carrera()
+        self.end_screen = EndScreen()
 
         # Creamos las variables para mandar las stats al puerto de prometheus
         self.p1_colision = prometheus_client.Counter(
@@ -64,49 +67,39 @@ class Game:
     def loop(self):
         running = True
         while running:
-            if self.controller == 1:   #menu principla 
+            # Primero, procesamos los eventos
+            for event in pygame.event.get():
+                # Llama al manejador de eventos, pasando `self` (el objeto `Game`)
+                running = self.event_handler.handle_event(self, event)
+                if not running:
+                    break
+            # Después de manejar eventos, actualizamos el estado del juego y dibujamos
+            if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
-            elif self.controller == 2:  #Cohetes 
+            elif self.controller == 2:  # Carrera
                 self.start_carrera.draw(self)
                 self.start_carrera.update(self)
                 if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
-                    self.controller=3
-                    print('Ingresando al menú de finalización')
-                    self.end_game() #Determina el ganador
-                    #self.game_over() # Termina el juego #x y manda los datos a la base de datos
-                    #self.metrics()
-                    self.end_screen() # pantalla final 
-                    self.player1.rect.centerx=600
-                    self.player2.rect.centerx=200
-                    self.collision_count_p1=0
-                    self.collision_count_p2=0
-                    self.player1.score=0
-                    self.player2.score=0
-                    # Al finalizar el juego  
-            elif self.controller == 3:
-                print('Ingresando al menú de finalización')
-                self.end_game() #Determina el ganador
-                #self.game_over() # Termina el juego #x y manda los datos a la base de datos
-                #self.metrics()
-                self.end_screen() # pantalla final 
-                self.player1.rect.centerx=600
-                self.player2.rect.centerx=200
-                self.collision_count_p1=0
-                self.collision_count_p2=0
-                self.player1.score=0
-                self.player2.score=0
-                # Al finalizar el juego
-            for event in pygame.event.get():
-                # Llama al manejador de eventos, pasando `self` (el objeto `Game`)
-                self.running = self.event_handler.handle_event(self, event) 
-            if not running:
-                break
+                    self.controller = 3
+            elif self.controller == 3:  # Fin del juego
+                self.end_game()  # Determina el ganador
+                self.end_screen.draw(self)  # Pantalla final
+                self.reset_game()   # Reseteamos
+            # Finalmente, actualizamos la pantalla y el reloj
             pygame.display.flip()
             self.clock.tick(60)
-
+    
+    def reset_game(self):
+        # Resetea el estado del juego cuando termina
+        self.player1.rect.centerx = 600
+        self.player2.rect.centerx = 200
+        self.collision_count_p1 = 0
+        self.collision_count_p2 = 0
+        self.player1.score = 0
+        self.player2.score = 0
 
     
-    def game_over(self):
+    def game_over_1(self):
         player1_colision=int(self.collision_count_p1)
         player2_colision=int(self.collision_count_p2)
         winner=str(self.winner)
@@ -130,11 +123,6 @@ class Game:
             print("Datos guardados con éxito:", response.json())
         except requests.exceptions.RequestException as e:
             print(f"Error al enviar los datos: {e}")
-
-    def metrics(self):
-        url = "http://localhost:8000/metrics"
-        response = requests.get(url)
-
 
     def check_collisions(self, player, player_num):
 
@@ -164,12 +152,9 @@ class Game:
                 self.player2.update_score()
                 self.p2_score.inc(20)
 
-
-
     def end_game(self):
         self.winner = "Jugador 1" if self.player1.score > self.player2.score else "Jugador 2"
         
-
     def display_time(self):
         # Restamos el tiempo actual menos el tiempo de inicio del juego 
         current_time = pygame.time.get_ticks() - self.start_time
@@ -225,86 +210,9 @@ class Game:
         # Actualizar la pantalla de Pygame
         pygame.display.flip()
 
-
-    
-    def end_screen(self):
-        print('Ingreso')
-        # Dibujar la pantalla de finalización
-        self.draw_end_screen()
-        pygame.display.flip()
-    
-    def draw_end_screen(self):
-        # Fondo de la pantalla de finalización
-        background_image = pygame.image.load("sprites/fondo.png")
-        self.screen.blit(background_image, (0, 0))
-
-        # Dibujar los botones de reiniciar y volver al menú
-        button_restart = pygame.image.load("sprites/boton_off.png")
-        button_menu = pygame.image.load("sprites/boton_menu.png")
-    
-
-        self.button_rect_restart = button_restart.get_rect()
-        self.button_rect_restart.topleft = (300, 500)
-        self.button_rect_menu = button_menu.get_rect()
-        self.button_rect_menu.topleft = (400, 500)
-
-        # Mostrar los botones en la pantalla
-        self.screen.blit(button_restart, self.button_rect_restart.topleft)
-        
-
-        # Título de "Game Over" o similar
-        font = pygame.font.Font(None, 57)
-        game_over_text = font.render("¡Juego Terminado!", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 110))
-
-        # Escribir ganador
-        font = pygame.font.Font(None, 50)
-        if self.player1.score > self.player2.score:
-            game_over_text = font.render("Ganó el Jugador 1", True, (255, 255, 255))
-            self.screen.blit(game_over_text, (200, 160))
-        elif self.player2.score > self.player1.score:
-            game_over_text = font.render("Ganó el Jugador 2", True, (255, 255, 255))
-            self.screen.blit(game_over_text, (200, 160))
-
-        #Estadisticas
-        font = pygame.font.Font(None, 50)
-        game_over_text = font.render("Resumen del Juego:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 200))
-
-        #Jugador1
-        font = pygame.font.Font(None, 35)
-        game_over_text = font.render("Jugador1:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 260))
-
-
-
-        #Score jugador 1
-        font = pygame.font.Font(None, 28)
-        game_over_text = font.render(
-            f"Número de colisiones: {self.collision_count_p1}, Score del jugador: {self.player1.score}",
-            True,
-            (255, 255, 255)
-        )
-        self.screen.blit(game_over_text, (200, 300))
-
-        #Jugador2
-        font = pygame.font.Font(None, 35)
-        game_over_text = font.render("Jugador2:", True, (255, 255, 255))
-        self.screen.blit(game_over_text, (200, 340))
-
-
-
-        #Score jugador 2
-        font = pygame.font.Font(None, 28)
-        game_over_text = font.render(
-            f"Número de colisiones: {self.collision_count_p2}, Score del jugador: {self.player2.score}",
-            True,
-            (255, 255, 255)
-        )
-        self.screen.blit(game_over_text, (200, 380))
-
-        pygame.display.flip()
-
+    def metrics(self):
+        url = "http://localhost:8000/metrics"
+        response = requests.get(url)
 
 """"
     # Loop principal 
