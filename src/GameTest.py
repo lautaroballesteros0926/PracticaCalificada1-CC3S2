@@ -1,5 +1,5 @@
 import pygame
-from game import Game  # Asegúrate de importar correctamente tu clase Game
+from src.game import Game  # Asegúrate de importar correctamente tu clase Game
 
 class GameTest:
     def __init__(self):

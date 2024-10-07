@@ -1,17 +1,17 @@
 import pygame
-from fastapi import Depends
-from background import Background
-from players import Player
-from coin import Coin
-from meteorite import Meteorite
+from src.background import Background
+from src.players import Player
+from src.coin import Coin
+from src.meteorite import Meteorite
 import prometheus_client
 import requests 
 
 # Nuevas clases 
-from event_handler import EventHandler
-from main_menu import MainMenu 
-from carrera import Carrera
-from end_screen import EndScreen
+from src.event_handler import EventHandler
+from src.main_menu import MainMenu 
+from src.carrera import Carrera
+from src.end_screen import EndScreen
+from src.stats_screen import StatsScreen 
 
 class Game:
     def __init__(self):
@@ -27,7 +27,7 @@ class Game:
         self.main_menu = MainMenu()
         self.start_carrera = Carrera()
         self.end_screen = EndScreen()
-
+        self.stats_screen = StatsScreen()
         # Creamos las variables para mandar las stats al puerto de prometheus
         self.p1_colision = prometheus_client.Counter(
             "colisions_p1",
@@ -77,6 +77,15 @@ class Game:
             if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
             elif self.controller == 2:  # Carrera
+                keys = pygame.key.get_pressed()  # Obtiene el estado de todas las teclas presionadas
+                if keys[pygame.K_LEFT]:
+                    self.player1.move(-6, 0)  # Mueve el jugador 1 a la izquierda
+                if keys[pygame.K_RIGHT]:
+                    self.player1.move(6, 0)  # Mueve el jugador 1 a la derecha
+                if keys[pygame.K_a]:
+                    self.player2.move(-6, 0)  # Mueve el jugador 2 a la izquierda
+                if keys[pygame.K_d]:
+                    self.player2.move(6, 0)
                 self.start_carrera.draw(self)
                 self.start_carrera.update(self)
                 if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
@@ -85,6 +94,8 @@ class Game:
                 self.end_game()  # Determina el ganador
                 self.end_screen.draw(self)  # Pantalla final
                 self.reset_game()   # Reseteamos
+            elif self.controller == 4: 
+                self.stats_screen.draw(self)
             # Finalmente, actualizamos la pantalla y el reloj
             pygame.display.flip()
             self.clock.tick(60)
@@ -97,9 +108,13 @@ class Game:
         self.collision_count_p2 = 0
         self.player1.score = 0
         self.player2.score = 0
-
+        for meteorite in self.meteorites:
+            meteorite.reset_position()
+        for coin in self.coins:
+            coin.reset_position()
     
-    def game_over_1(self):
+    
+    def game_over(self):
         player1_colision=int(self.collision_count_p1)
         player2_colision=int(self.collision_count_p2)
         winner=str(self.winner)
@@ -161,54 +176,6 @@ class Game:
         seconds = current_time // 1000
         time_text = self.font.render(f"Tiempo: {seconds} s", True, (255, 255, 255))
         self.screen.blit(time_text, (10, 70))                       
-    
-            
-    def stats_screen(self):
-        api_url = "http://localhost:8000/games"
-        response = requests.get(api_url)
-        games = response.json()
-
-        running = True
-        while running:
-            self.draw_stats_screen(games)  # Pasar las partidas como argumento
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                    
-            pygame.display.flip()
-
-    def draw_stats_screen(self, games):
-        pygame.display.set_caption("Estadísticas")
-        
-        # Cargar la imagen de fondo
-        background_image = pygame.image.load("sprites/fondo_espacial.png")
-        self.screen.blit(background_image, (0, 0))
-        
-        # Configurar la fuente para mostrar el texto en pantalla
-        font = pygame.font.Font(None, 36)
-        
-        # Coordenadas iniciales para imprimir las partidas
-        y_offset = 50  # Margen superior
-        line_spacing = 40  # Espacio entre cada línea
-        
-        # Iterar sobre las partidas obtenidas de la API
-        for game in games[-5:]:  # Muestra solo las últimas 5 partidas
-            player1_score = game['player1_score']
-            player2_score = game['player2_score']
-            winner = game['winner']
-            
-            # Texto que se mostrará para cada partida
-            game_text = f"Jugador 1: {player1_score} - Jugador 2: {player2_score} - Ganador: {winner}"
-            
-            # Renderizar el texto
-            text_surface = font.render(game_text, True, (255, 255, 255))  # Texto en blanco
-            self.screen.blit(text_surface, (50, y_offset))  # Dibujar en la pantalla
-            
-            # Actualizar el offset para la siguiente línea
-            y_offset += line_spacing
-
-        # Actualizar la pantalla de Pygame
-        pygame.display.flip()
 
     def metrics(self):
         url = "http://localhost:8000/metrics"
