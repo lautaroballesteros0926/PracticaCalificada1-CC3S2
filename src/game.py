@@ -77,6 +77,15 @@ class Game:
             if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
             elif self.controller == 2:  # Carrera
+                keys = pygame.key.get_pressed()  # Obtiene las teclas presionadas
+                if keys[pygame.K_LEFT]:
+                    self.player1.move(-6, 0)  # Mueve el jugador 1 a la izquierda
+                if keys[pygame.K_RIGHT]:
+                    self.player1.move(6, 0)  # Mueve el jugador 1 a la derecha
+                if keys[pygame.K_a]:
+                    self.player2.move(-6, 0)  # Mueve el jugador 2 a la izquierda
+                if keys[pygame.K_d]:
+                    self.player2.move(6, 0) 
                 self.start_carrera.draw(self)
                 self.start_carrera.update(self)
                 if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):

@@ -9,7 +9,7 @@ class EventHandler:
         if game.controller == 1:  # Menu principal 
             return self.handle_menu_event(game, event)
         elif game.controller == 2:  # Carrera
-            return self.handle_game_event(game, event)
+            return self.handle_game_event(game)
         elif game.controller == 3:  # reinicia el juego 
             return self.handle_end_event(game,event)
         
@@ -28,7 +28,7 @@ class EventHandler:
                     if game.main_menu.buttom_rect_stats.collidepoint(mouse_pos):
                         game.stats_screen()
         return True              
-    def handle_game_event(self, game, event):
+    def handle_game_event(self, game):
         keys = pygame.key.get_pressed()  # Obtiene las teclas presionadas
         if keys[pygame.K_LEFT]:
             game.player1.move(-6, 0)  # Mueve el jugador 1 a la izquierda
@@ -37,7 +37,7 @@ class EventHandler:
         if keys[pygame.K_a]:
             game.player2.move(-6, 0)  # Mueve el jugador 2 a la izquierda
         if keys[pygame.K_d]:
-            game.player2.move(6, 0) 
+            game.player2.move(6, 0)
         return True
     
     def handle_end_event(self, game, event):
