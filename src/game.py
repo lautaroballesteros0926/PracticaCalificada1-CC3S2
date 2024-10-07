@@ -1,17 +1,17 @@
 import pygame
 from fastapi import Depends
-from background import Background
-from players import Player
-from coin import Coin
-from meteorite import Meteorite
+from src.background import Background
+from src.players import Player
+from src.coin import Coin
+from src.meteorite import Meteorite
 import prometheus_client
 import requests 
 
 # Nuevas clases 
-from event_handler import EventHandler
-from main_menu import MainMenu 
-from carrera import Carrera
-from end_screen import EndScreen
+from src.event_handler import EventHandler
+from src.main_menu import MainMenu 
+from src.carrera import Carrera
+from src.end_screen import EndScreen
 
 class Game:
     def __init__(self):
