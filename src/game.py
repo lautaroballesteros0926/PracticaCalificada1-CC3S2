@@ -6,6 +6,11 @@ from coin import Coin
 from meteorite import Meteorite
 import prometheus_client
 import requests 
+
+# Nuevas clases 
+from event_handler import EventHandler
+from MainMenu import MainMenu 
+from carrera import carrera
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
@@ -14,6 +19,11 @@ class Game:
         self.player2 = Player('sprites/cohete2.png',200)
         self.collision_count_p1 = 0  # Contador de colisiones para el jugador 1
         self.collision_count_p2 = 0  # Contador de colisiones para el jugador 2
+
+        # Nuevos Objetos 
+        self.event_handler = EventHandler()
+        self.main_menu = MainMenu()
+        self.start_carrera = carrera()
 
         # Creamos las variables para mandar las stats al puerto de prometheus
         self.p1_colision = prometheus_client.Counter(
@@ -50,58 +60,21 @@ class Game:
         # Fondo 
         self.background = Background() 
 
-    # Loop principal 
+
     def loop(self):
         running = True
         while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if self.controller==1:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:  # 1 es el botón izquierdo del ratón
-                            # Obtener la posición del clic
-                            mouse_pos = pygame.mouse.get_pos()
-                            # Verificar si el clic ocurrió dentro del área del botón
-                            if self.buttom_rect_start.collidepoint(mouse_pos):
-                                # entra al juego directamente
-                                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                                self.controller=2
-                                # cerramos si cierras la ventana en loop
-                            if self.buttom_rect_stats.collidepoint(mouse_pos):
-                                self.stats_screen()
-                            if self.buttom_rect_off.collidepoint(mouse_pos):
-                                self.controller=1
-                else:
-                    if self.controller==3:
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if event.button == 1:  # 1 es el botón izquierdo del ratón
-                                # Obtener la posición del clic
-                                mouse_pos = pygame.mouse.get_pos()
-                                # Verificar si el clic ocurrió dentro del área del botón
-                                if self.button_rect_restart.collidepoint(mouse_pos):
-                                    self.controller=1
-                                    self.player1.rect.centerx=600
-                                    self.player2.rect.centerx=200
-            if self.controller == 1:
-                self.player1.score=0
-                self.player2.score=0
-                self.collision_count_p1=0
-                self.collision_count_p2=0
-                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                self.draw_menu()
-            else:
-                if self.controller == 2:
-                    self.handle_input()
-                    self.update()
-                    self.draw()
-                
+            if self.controller == 1:   #menu principla 
+                self.main_menu.draw(self)
+            elif self.controller == 2:  #Cohetes 
+                self.start_carrera.draw(self)
+                self.start_carrera.update(self)
                 if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
                     self.controller=3
                     print('Ingresando al menú de finalización')
                     self.end_game() #Determina el ganador
-                    self.game_over() # Termina el juego #x y manda los datos a la base de datos
-                    self.metrics()
+                    #self.game_over() # Termina el juego #x y manda los datos a la base de datos
+                    #self.metrics()
                     self.end_screen() # pantalla final 
                     self.player1.rect.centerx=600
                     self.player2.rect.centerx=200
@@ -109,12 +82,31 @@ class Game:
                     self.collision_count_p2=0
                     self.player1.score=0
                     self.player2.score=0
-                    # Al finalizar el juego             
+                    # Al finalizar el juego  
+            elif self.controller == 3:
+                print('Ingresando al menú de finalización')
+                self.end_game() #Determina el ganador
+                #self.game_over() # Termina el juego #x y manda los datos a la base de datos
+                #self.metrics()
+                self.end_screen() # pantalla final 
+                self.player1.rect.centerx=600
+                self.player2.rect.centerx=200
+                self.collision_count_p1=0
+                self.collision_count_p2=0
+                self.player1.score=0
+                self.player2.score=0
+                # Al finalizar el juego
+            for event in pygame.event.get():
+                # Llama al manejador de eventos, pasando `self` (el objeto `Game`)
+                self.running = self.event_handler.handle_event(self, event) 
+            if not running:
+                break
+            pygame.display.flip()
             self.clock.tick(60)
-    
+
+
     
     def game_over(self):
-
         player1_colision=int(self.collision_count_p1)
         player2_colision=int(self.collision_count_p2)
         winner=str(self.winner)
@@ -143,34 +135,6 @@ class Game:
         url = "http://localhost:8000/metrics"
         response = requests.get(url)
 
-    # Controla las teclas para players 
-    def handle_input(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.player1.move(-5, 0)
-        if keys[pygame.K_RIGHT]:
-            self.player1.move(5, 0)
-        if keys[pygame.K_a]:
-            self.player2.move(-5, 0)
-        if keys[pygame.K_d]:
-            self.player2.move(5, 0)
-
-    #Actualiza todos los sprites 
-    def update(self):
-        
-        self.background.update()  # Actualiza el fondo
-        
-        # Actualizamos posiciones de los sprites 
-        
-        self.meteorites.update()
-        self.coins.update()
-
-        # Verificar colisiones si es que no llegan a 100 y aun no se le acaba las vida (maximo 3 choques)
-        if self.player1.score <100 and self.collision_count_p1<3:
-            self.check_collisions(self.player1, 1)
-
-        if self.player2.score <100 and self.collision_count_p2<3:
-            self.check_collisions(self.player2, 2)
 
     def check_collisions(self, player, player_num):
 
@@ -206,85 +170,12 @@ class Game:
         self.winner = "Jugador 1" if self.player1.score > self.player2.score else "Jugador 2"
         
 
-    def draw(self):
-        # Dibuja el fondo
-        self.background.draw(self.screen)
-
-        #Dibuja los sprites si tienen puntaje menor a 100 y si aun tienen vidas 
-        if(self.player1.score < 100 and self.collision_count_p1<3): 
-            self.screen.blit(self.player1.image, self.player1.rect)
-        if(self.player2.score < 100 and self.collision_count_p2<3):
-            self.screen.blit(self.player2.image, self.player2.rect)
-
-        self.meteorites.draw(self.screen) # distinto porque es un grupo de sprites 
-        self.coins.draw(self.screen)
-        
-        # Mostrar contadores de colisiones
-        text_p1 = self.font.render(f"Score: {self.player1.score}", True, (255, 255, 255))
-        text_p2 = self.font.render(f"Score: {self.player2.score}", True, (255, 255, 255))
-        self.screen.blit(text_p1, (10, 10))
-        self.screen.blit(text_p2, (10, 40))
-
-        self.display_time()
-        pygame.display.flip()
-
     def display_time(self):
         # Restamos el tiempo actual menos el tiempo de inicio del juego 
         current_time = pygame.time.get_ticks() - self.start_time
         seconds = current_time // 1000
         time_text = self.font.render(f"Tiempo: {seconds} s", True, (255, 255, 255))
-        self.screen.blit(time_text, (10, 70))
-
-
-    # Creacion del menu
-
-    def main_menu(self):
-
-        self.draw_menu()
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # 1 es el botón izquierdo del ratón
-                    # Obtener la posición del clic
-                    mouse_pos = pygame.mouse.get_pos()
-                    # Verificar si el clic ocurrió dentro del área del botón
-                    if self.buttom_rect_start.collidepoint(mouse_pos):
-                        # entra al juego directamente
-                        self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
-                        self.loop()
-                        # cerramos si cierras la ventana en loop
-
-                    if self.buttom_rect_stats.collidepoint(mouse_pos):
-                        self.stats_screen()
-
-                            
-    def draw_menu(self): 
-        pygame.display.set_caption("Menú de Juego")
-        # Cargar la imagen de fondo
-        background_image = pygame.image.load("sprites/fondo.png")
-        self.screen.blit(background_image, (0, 0))
-
-        # Cargando las imágenese
-        title_menu = pygame.image.load("sprites/boton_menu.png")
-        buttom_start = pygame.image.load("sprites/boton_start.png")
-        buttom_off = pygame.image.load("sprites/boton_off.png")
-        buttom_stats = pygame.image.load("sprites/boton_stats.png")
-
-        # Crear un rectángulo a partir de la imagen del botón
-        self.buttom_rect_start = buttom_start.get_rect()  # Hacemos self para acceder a este rectángulo desde main_menu
-        self.buttom_rect_start.topleft = (330, 270)  # Posición del botón en la pantalla
-        self.buttom_rect_stats = buttom_stats.get_rect()
-        self.buttom_rect_stats.topleft = (330, 345)  # Posición del botón en la pantalla
-        self.buttom_rect_off = buttom_off.get_rect()  # Igual para este botón
-        self.buttom_rect_off.topleft = (380, 420)
-
-        # Dibujar el texto menú y botones en la pantalla
-        self.screen.blit(title_menu, (280, 100))
-        self.screen.blit(buttom_start, self.buttom_rect_start.topleft)
-        self.screen.blit(buttom_stats, self.buttom_rect_stats.topleft)
-        self.screen.blit(buttom_off, self.buttom_rect_off.topleft)
-
-        pygame.display.flip()
-
+        self.screen.blit(time_text, (10, 70))                       
     
             
     def stats_screen(self):
@@ -413,3 +304,69 @@ class Game:
         self.screen.blit(game_over_text, (200, 380))
 
         pygame.display.flip()
+
+
+""""
+    # Loop principal 
+    def loop(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if self.controller==1:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:  # 1 es el botón izquierdo del ratón
+                            # Obtener la posición del clic
+                            mouse_pos = pygame.mouse.get_pos()
+                            # Verificar si el clic ocurrió dentro del área del botón
+                            if self.buttom_rect_start.collidepoint(mouse_pos):
+                                # entra al juego directamente
+                                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                                self.controller=2
+                                # cerramos si cierras la ventana en loop
+                            if self.buttom_rect_stats.collidepoint(mouse_pos):
+                                self.stats_screen()
+                            if self.buttom_rect_off.collidepoint(mouse_pos):
+                                self.controller=1
+                else:
+                    if self.controller==3:
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            if event.button == 1:  # 1 es el botón izquierdo del ratón
+                                # Obtener la posición del clic
+                                mouse_pos = pygame.mouse.get_pos()
+                                # Verificar si el clic ocurrió dentro del área del botón
+                                if self.button_rect_restart.collidepoint(mouse_pos):
+                                    self.controller=1
+                                    self.player1.rect.centerx=600
+                                    self.player2.rect.centerx=200
+            if self.controller == 1:
+                self.player1.score=0
+                self.player2.score=0
+                self.collision_count_p1=0
+                self.collision_count_p2=0
+                self.start_time = pygame.time.get_ticks()  # Guarda el tiempo de inicio del juego 
+                self.draw_menu()
+            else:
+                if self.controller == 2:
+                    self.handle_input()
+                    self.update()
+                    self.draw()
+                
+                if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
+                    self.controller=3
+                    print('Ingresando al menú de finalización')
+                    self.end_game() #Determina el ganador
+                    self.game_over() # Termina el juego #x y manda los datos a la base de datos
+                    self.metrics()
+                    self.end_screen() # pantalla final 
+                    self.player1.rect.centerx=600
+                    self.player2.rect.centerx=200
+                    self.collision_count_p1=0
+                    self.collision_count_p2=0
+                    self.player1.score=0
+                    self.player2.score=0
+                    # Al finalizar el juego             
+            self.clock.tick(60)
+            
+"""     
