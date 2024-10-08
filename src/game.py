@@ -63,6 +63,8 @@ class Game:
         # Fondo 
         self.background = Background() 
 
+        #bandera para enviar datos y reinicio de datos
+        self.flag = True
 
     def loop(self):
         running = True
@@ -76,7 +78,8 @@ class Game:
             # Después de manejar eventos, actualizamos el estado del juego y dibujamos
             if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
-                self.reset_game()  # Reseteamos
+                self.flag = True
+                self.reset_game()
             elif self.controller == 2:  # Carrera
                 keys = pygame.key.get_pressed()  # Obtiene el estado de todas las teclas presionadas
                 if keys[pygame.K_LEFT]:
@@ -92,14 +95,10 @@ class Game:
                 if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
                     self.controller = 3
             elif self.controller == 3:  # Fin del juego
-                self.end_game()  # Determina el ganador
-                print(self.player1.score)
-                print(self.player2.score)
-                print(self.collision_count_p1)
-                print(self.collision_count_p2)
-                print(self.winner)
                 self.end_screen.draw(self)  # Pantalla final
-                #self.reset_game()   # Reseteamos
+                if(self.flag):
+                    self.game_over() #envio de datos 
+                    self.flag = False
             elif self.controller == 4: # Pantalla de estadistica 
                 self.stats_screen.draw(self)
             # Finalmente, actualizamos la pantalla y el reloj
@@ -121,11 +120,11 @@ class Game:
     
     
     def game_over(self):
-        player1_colision=int(self.collision_count_p1)
-        player2_colision=int(self.collision_count_p2)
-        winner=str(self.winner)
-        score_player1=int(self.player1.score)
-        score_player2=int(self.player2.score)
+        player1_colision = int(self.collision_count_p1)
+        player2_colision = int(self.collision_count_p2)
+        winner = str(self.winner)
+        score_player1 = int(self.player1.score)
+        score_player2 = int(self.player2.score)
         
         url = "http://localhost:8000/stats"
         data = {
@@ -136,14 +135,13 @@ class Game:
             "score_player2": score_player2
         }
 
-
-        response = requests.post(url, json=data)
         try:
             response = requests.post(url, json=data)
             response.raise_for_status()  # Lanza una excepción para códigos de estado 4xx y 5xx
             print("Datos guardados con éxito:", response.json())
         except requests.exceptions.RequestException as e:
             print(f"Error al enviar los datos: {e}")
+
 
     def check_collisions(self, player, player_num):
 
