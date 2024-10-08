@@ -138,8 +138,9 @@ def colision_check(context,posicion):
 @then('la posicion del meteorito se reinicia cambiando a una posicion aleatoria entre "{posicion}" en el eje x')
 def colision_check(context,posicion):
     game.check_collisions(game.player1,1)
-    pattern=re.compile(r'(-\d+)\sy\s(-\d+)')
+    pattern=re.compile(r'(\d+)\sy\s(\d+)')
     match=pattern.match(posicion.lower())
+    print(match.group(0))
     cota_inferior=int(match.group(1))
     cota_superior=int(match.group(2))
     print(meteorite.rect.x)

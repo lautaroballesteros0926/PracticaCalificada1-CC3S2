@@ -91,8 +91,7 @@ class Game:
                     self.player2.move(6, 0)
                 self.start_carrera.draw(self)
                 self.start_carrera.update(self)
-                if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
-                    self.controller = 3
+                self.finalizacion()
             elif self.controller == 3:  # Fin del juego
                 self.end_screen.draw(self)  # Pantalla final
                 if(self.flag):
@@ -184,6 +183,10 @@ class Game:
         url = "http://localhost:8000/metrics"
         response = requests.get(url)
 
+    
+    def finalizacion(self):
+        if (self.player1.score == 100 or self.player2.score == 100 or (self.collision_count_p1 == 3 and self.collision_count_p2 == 3)):
+            self.controller = 3
 """"
     # Loop principal 
     def loop(self):
