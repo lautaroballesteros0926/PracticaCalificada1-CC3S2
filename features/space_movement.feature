@@ -18,3 +18,8 @@
       Cuando presiono el boton flecha arriba
       Entonces no debe suceder ningun movimiento
 
+
+
+
+  
+

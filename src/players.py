@@ -9,6 +9,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = 600
         self.score = 0
         self.life=True
+        
     def getPosition(self):
         return self.rect.center
     
