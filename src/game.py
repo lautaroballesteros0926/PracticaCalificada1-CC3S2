@@ -45,7 +45,6 @@ class Game:
             "score_p2",
             "score del jugador 2"
         )
-
         # grupo de sprites
         self.controller = 1
         self.coins = pygame.sprite.Group()
@@ -76,6 +75,7 @@ class Game:
             # Después de manejar eventos, actualizamos el estado del juego y dibujamos
             if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
+                print(self.player2.rect)
             elif self.controller == 2:  # Carrera
                 keys = pygame.key.get_pressed()  # Obtiene el estado de todas las teclas presionadas
                 if keys[pygame.K_LEFT]:

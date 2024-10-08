@@ -8,7 +8,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = position         #coordenada del eje x del centro de la imagen 
         self.rect.bottom = 600
         self.score = 0
-
+        self.life=True
+    def getPosition(self):
+        return self.rect.center
+    
+    def setPosition(self,x,y):
+        self.rect.center=(x,y)
+    
     def move(self, dx, dy):
         self.rect.x += dx
         self.rect.y += dy
