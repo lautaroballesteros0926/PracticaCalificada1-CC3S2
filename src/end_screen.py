@@ -26,7 +26,7 @@ class EndScreen:
         game.screen.blit(self.background_image, (0, 0))
 
     def _draw_buttons(self, game):
-        """Dibuja los botones de reiniciar y volver al menú."""
+        """Dibuja el boton de reiniciar ."""
         game.screen.blit(self.button_restart, self.button_rect_restart.topleft)
 
     def _draw_game_over_text(self, game):
@@ -36,12 +36,10 @@ class EndScreen:
 
     def _draw_winner_text(self, game):
         """Muestra el ganador del juego."""
-        if game.player1.score > game.player2.score:
+        if game.winner == 'Jugador 1':
             winner_text = self.font_medium.render("Ganó el Jugador 1", True, (255, 255, 255))
-        elif game.player2.score > game.player1.score:
-            winner_text = self.font_medium.render("Ganó el Jugador 2", True, (255, 255, 255))
         else:
-            winner_text = self.font_medium.render("Empate", True, (255, 255, 255))
+            winner_text = self.font_medium.render("Ganó el Jugador 2", True, (255, 255, 255))
         game.screen.blit(winner_text, (200, 160))
 
     def _draw_stats(self, game):

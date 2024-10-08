@@ -12,7 +12,8 @@ class EventHandler:
             pass
         elif game.controller == 3:  # reinicia el juego 
             return self.handle_end_event(game,event)
-        
+        elif game.controller == 4: 
+            pass 
         return True  
 
     def handle_menu_event(self, game, event):
