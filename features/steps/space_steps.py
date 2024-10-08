@@ -147,7 +147,6 @@ def colision_check(context,posicion):
     print(cota_superior)
     assert int(meteorite.rect.x) in range(cota_inferior,cota_superior),'No se reinicio el meteorito'
 
-
 ########################################################################################
 
 @given('que la nave del jugador 1 tiene "{vidas}"')
@@ -159,7 +158,7 @@ def player1_win(context,vidas):
     else:
         raise ValueError(f'no se pudo interpretar el puntaje:{vidas}')
 
-@when('llega a los {puntaje}')
+@when('llega a los "{puntaje}"')
 def end_game(context,puntaje):
     pattern=re.compile(r'(\d+)\s(?:puntos?)')
     match=pattern.match(puntaje)
