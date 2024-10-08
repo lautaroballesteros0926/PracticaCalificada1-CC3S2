@@ -170,5 +170,5 @@ def end_game(context,puntaje):
     
 @then('el jugador 1 podrá visualizar los resultados de la partida')
 def draw_stats(context):
-    assert game.controller==3,"No se abrio el menu de finalizacion"
+    assert game.finalizacion,"No se abrio el menu de finalizacion"
 

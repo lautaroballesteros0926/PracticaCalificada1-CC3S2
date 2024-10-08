@@ -93,6 +93,7 @@ class Game:
                 self.start_carrera.update(self)
                 self.finalizacion()
             elif self.controller == 3:  # Fin del juego
+                self.end_game()
                 self.end_screen.draw(self)  # Pantalla final
                 if(self.flag):
                     self.game_over() #envio de datos 
