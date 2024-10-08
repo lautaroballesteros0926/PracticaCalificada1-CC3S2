@@ -75,7 +75,7 @@ class Game:
             # Después de manejar eventos, actualizamos el estado del juego y dibujamos
             if self.controller == 1:  # Menú principal
                 self.main_menu.draw(self)
-                print(self.player2.rect)
+                self.reset_game()  # Reseteamos
             elif self.controller == 2:  # Carrera
                 keys = pygame.key.get_pressed()  # Obtiene el estado de todas las teclas presionadas
                 if keys[pygame.K_LEFT]:
@@ -92,9 +92,14 @@ class Game:
                     self.controller = 3
             elif self.controller == 3:  # Fin del juego
                 self.end_game()  # Determina el ganador
+                print(self.player1.score)
+                print(self.player2.score)
+                print(self.collision_count_p1)
+                print(self.collision_count_p2)
+                print(self.winner)
                 self.end_screen.draw(self)  # Pantalla final
-                self.reset_game()   # Reseteamos
-            elif self.controller == 4: 
+                #self.reset_game()   # Reseteamos
+            elif self.controller == 4: # Pantalla de estadistica 
                 self.stats_screen.draw(self)
             # Finalmente, actualizamos la pantalla y el reloj
             pygame.display.flip()

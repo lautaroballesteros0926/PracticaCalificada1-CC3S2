@@ -66,6 +66,7 @@ def colision_player(context,posicion):
         x_player=int(match.group(1))
         y_player=int(match.group(2))
         game.player1.rect.center=(x_player,y_player)
+
     else:
         raise(f'sdas')
 
@@ -77,6 +78,7 @@ def colision_meteorite(context,posicion):
     if match:
         x_met=int(match.group(1))
         y_met=int(match.group(2))
+
         meteorite.rect.center=(x_met,y_met)
         game.meteorites.add(meteorite)
     else:
@@ -119,6 +121,7 @@ def colision_numberthree(context,cantidad):
 def nave_destruccion(context):
     assert game.player1.life, "La nave no se destruyo"
     game.reset_game()
+
 
 
 
