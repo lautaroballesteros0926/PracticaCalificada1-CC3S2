@@ -3,7 +3,7 @@ import requests
 
 class StatsScreen:
     def draw(self, game):
-
+        print("Entrando a la función draw")
         sessions = self.get_stats()
         pygame.display.set_caption("Estadísticas")
         
@@ -20,8 +20,8 @@ class StatsScreen:
         
         # Iterar sobre las partidas obtenidas de la API
         for session in sessions[-5:]:  # Muestra solo las últimas 5 partidas
-            player1_score = session['player1_score']
-            player2_score = session['player2_score']
+            player1_score = session['score_player1']
+            player2_score = session['score_player2']
             winner = session['winner']
             
             # Texto que se mostrará para cada partida
@@ -37,6 +37,11 @@ class StatsScreen:
 
     def get_stats(self):
         api_url = "http://localhost:8000/games"
-        response = requests.get(api_url)
-        sessions = response.json()
-        return sessions
+        try:
+            response = requests.get(api_url)
+            response.raise_for_status()  # Lanza un error si la respuesta no es 200 OK
+            sessions = response.json()
+            return sessions
+        except requests.exceptions.RequestException as e:
+            print(f"Error al obtener estadísticas: {e}")
+            return []  # Devuelve una lista vacía si hay un error
