@@ -45,7 +45,6 @@ class Game:
             "score_p2",
             "score del jugador 2"
         )
-
         # grupo de sprites
         self.controller = 1
         self.coins = pygame.sprite.Group()

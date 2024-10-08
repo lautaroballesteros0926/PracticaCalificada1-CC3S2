@@ -10,7 +10,6 @@ meteorite=Meteorite()
 
 ######################################################
 def movement(move):
-    print(game.player2.rect.centerx)
     if move=='izquierda' and game.player1.rect.centerx==595:
         game.player1.rect.centerx=600
         return True
@@ -24,7 +23,7 @@ def movement(move):
 def check_movimiento(context,direccion):
     pattern=re.compile(r'(izquierda|derecha|arriba)')
     match=pattern.match(direccion.lower())
-    print(game.player1.rect)
+    print(game.player1.rect.centerx)
     if match:
         print('a')
     else:
@@ -37,9 +36,9 @@ def do_movement(context,direccion):
     match=pattern.match(direccion.lower())
     if match:
         if match.group(1)=='izquierda':
-            game.player1.move(0,0)
+            game.player1.move(-5,0)
         elif match.group(1)=='derecha':
-            game.player1.move(0,0)
+            game.player1.move(5,0)
         else:
             print('No se movio la nave')
     else:
@@ -66,7 +65,8 @@ def colision_player(context,posicion):
     if match:
         x_player=int(match.group(1))
         y_player=int(match.group(2))
-        game.player1.rect.topleft=(x_player,y_player)
+        game.player1.rect.center=(x_player,y_player)
+
     else:
         raise(f'sdas')
 
@@ -78,16 +78,52 @@ def colision_meteorite(context,posicion):
     if match:
         x_met=int(match.group(1))
         y_met=int(match.group(2))
-        meteorite.rect.bottomleft=(x_met,y_met)
-        game.meteorites=meteorite
 
+        meteorite.rect.center=(x_met,y_met)
+        game.meteorites.add(meteorite)
     else:
-        raise(f'sdas')
+        raise(f'Posicion incorrecta')
     
-@then('Se le resta una vida al jugador')
+@then('se le resta una vida al jugador')
 def colision_life(context):
     game.check_collisions(game.player1,1)
     assert game.collision_count_p1==1,"Se deberia restar una vida al jugador"
+    game.reset_game()
+
+
+@given('la posicion del meteorito y de la nave coinciden y es {posicion}')
+def nave_meteor_position(context,posicion):
+    pattern=re.compile(r'(\d+),(\d+)')
+    match=pattern.match(posicion.lower())
+    if match:
+        x_player=int(match.group(1))
+        y_player=int(match.group(2))
+        game.player1.setPosition(x_player,y_player)
+        x_met=int(match.group(1))
+        y_met=int(match.group(2))
+        meteorite.rect.center=(x_met,y_met)
+        game.meteorites.add(meteorite)    
+    else:
+        raise ValueError(f'Valor no permitido')
+
+@when('el meteorito colisiona "{cantidad}" con la nave')
+def colision_numberthree(context,cantidad):
+    pattern=re.compile(r'(\d+)\s(?:veces|vez)')
+    match=pattern.match(cantidad.lower())
+    print(match.group(1))
+    if match:
+        game.collision_count_p1=int(match.group(1))
+    else:
+        raise ValueError(f"Entrada no permitida:{cantidad}")
+    
+
+@then('la nave debe ser destruida')
+def nave_destruccion(context):
+    assert game.player1.life, "La nave no se destruyo"
+    game.reset_game()
+
+
+
 
 
 

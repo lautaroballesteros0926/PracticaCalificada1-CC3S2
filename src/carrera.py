@@ -13,9 +13,10 @@ class Carrera:
         # Dibuja los jugadores si tienen puntaje menor a max_score y colisiones menores a max_collisions
         if game.player1.score < self.max_score and game.collision_count_p1 < self.max_collisions: 
             game.screen.blit(game.player1.image, game.player1.rect)
-        
+
         if game.player2.score < self.max_score and game.collision_count_p2 < self.max_collisions:
             game.screen.blit(game.player2.image, game.player2.rect)
+
 
         # Dibuja los grupos de meteoritos y monedas
         game.meteorites.draw(game.screen)
@@ -41,7 +42,10 @@ class Carrera:
         # Verificar colisiones y actualizaciones de puntaje si los jugadores no alcanzan el puntaje máximo y aún tienen vidas
         if game.player1.score < self.max_score and game.collision_count_p1 < self.max_collisions:
             game.check_collisions(game.player1, 1)
+        else:
+            game.player1.life=False
 
         if game.player2.score < self.max_score and game.collision_count_p2 < self.max_collisions:
             game.check_collisions(game.player2, 2)
-
+        else:
+            game.player2.life=False
