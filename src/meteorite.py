@@ -18,3 +18,4 @@ class Meteorite(pygame.sprite.Sprite):
     def reset_position(self):
         self.rect.x = random.randint(0, 800)
         self.rect.y = random.randint(-100, -40)
+        return True
