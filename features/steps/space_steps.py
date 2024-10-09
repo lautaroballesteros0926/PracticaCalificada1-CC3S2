@@ -150,12 +150,15 @@ def colision_check(context,posicion):
 
 ########################################################################################
 
-@given('que la nave del jugador 1 tiene "{vidas}"')
+@given('que la nave del "{vidas}"')
 def player1_win(context,vidas):
-    pattern=re.compile(r'(\d+)\s(?:vidas?)')
+    pattern=re.compile(r'jugador\s(\d+)\stiene\s(\d+)\s(?:vidas?)')
     match=pattern.match(vidas)
     if match:
-        game.collision_count_p1=3-int(match.group(1))
+        if match.group(1)=='1':
+            game.collision_count_p1=3-int(match.group(1))
+        elif match.group(1)=='2':
+            game.collision_count_p2=3-int(match.group(1))
     else:
         raise ValueError(f'no se pudo interpretar el puntaje:{vidas}')
 
@@ -168,7 +171,23 @@ def end_game(context,puntaje):
     else:
         raise ValueError(f'no se pudo interpretar el puntaje:{puntaje}')
     
-@then('el jugador 1 podrá visualizar los resultados de la partida')
+@when('la nave del "{vidas}"')
+def end_game(context,vidas):
+    pattern=re.compile(r'jugador\s(\d+)\stiene\s(\d+)\s(?:vidas?)')
+    match=pattern.match(vidas)
+    if match:
+        if match.group(1)=='1':
+            game.collision_count_p1=3-int(match.group(1))
+        elif match.group(1)=='2':
+            game.collision_count_p2=3-int(match.group(1))
+    else:
+        raise ValueError(f'no se pudo interpretar el puntaje:{vidas}')
+
+
+@then('el jugador podrá visualizar los resultados de la partida')
 def draw_stats(context):
     assert game.finalizacion,"No se abrio el menu de finalizacion"
+
+
+
 
