@@ -126,6 +126,66 @@ def nave_destruccion(context):
     assert game.player1.life, "La nave no se destruyo"
     game.reset_game()
 
+######################################
+@then('la posicion del meteorito se reinicia cambiando a una posicion aleatoria entre "{posicion}" en el eje y')
+def colision_check(context,posicion):
+    game.check_collisions(game.player1,1)
+    pattern=re.compile(r'(-\d+)\sy\s(-\d+)')
+    match=pattern.match(posicion.lower())
+    cota_inferior=int(match.group(1))
+    cota_superior=int(match.group(2))
+    print(meteorite.rect.y)
+    print(cota_inferior)
+    print(cota_superior)
+    assert int(meteorite.rect.y) in range(cota_inferior,cota_superior),'No se reinicio el meteorito'
+    game.reset_game()
+@then('la posicion del meteorito se reinicia cambiando a una posicion aleatoria entre "{posicion}" en el eje x')
+def colision_check(context,posicion):
+    game.check_collisions(game.player1,1)
+    pattern=re.compile(r'(\d+)\sy\s(\d+)')
+    match=pattern.match(posicion.lower())
+    print(match.group(0))
+    cota_inferior=int(match.group(1))
+    cota_superior=int(match.group(2))
+    print(meteorite.rect.x)
+    print(cota_inferior)
+    print(cota_superior)
+    assert int(meteorite.rect.x) in range(cota_inferior,cota_superior),'No se reinicio el meteorito'
+
+########################################################################################
+
+@given('que la nave del "{vidas}"')
+def player1_win(context,vidas):
+    pattern=re.compile(r'jugador\s(\d+)\stiene\s(\d+)\s(?:vidas?)')
+    match=pattern.match(vidas)
+    if match:
+        if match.group(1)=='1':
+            game.collision_count_p1=3-int(match.group(1))
+        elif match.group(1)=='2':
+            game.collision_count_p2=3-int(match.group(1))
+    else:
+        raise ValueError(f'no se pudo interpretar el puntaje:{vidas}')
+
+@when('llega a los "{puntaje}"')
+def end_game(context,puntaje):
+    pattern=re.compile(r'(\d+)\s(?:puntos?)')
+    match=pattern.match(puntaje)
+    if match:
+        game.player1.score=int(match.group(1))
+    else:
+        raise ValueError(f'no se pudo interpretar el puntaje:{puntaje}')
+    
+@when('la nave del "{vidas}"')
+def end_game(context,vidas):
+    pattern=re.compile(r'jugador\s(\d+)\stiene\s(\d+)\s(?:vidas?)')
+    match=pattern.match(vidas)
+    if match:
+        if match.group(1)=='1':
+            game.collision_count_p1=3-int(match.group(1))
+        elif match.group(1)=='2':
+            game.collision_count_p2=3-int(match.group(1))
+    else:
+        raise ValueError(f'no se pudo interpretar el puntaje:{vidas}')
 
 #######################################################
 
@@ -189,10 +249,17 @@ def colision_numberthree(context, numero):
         raise ValueError(f"Entrada no permitida:{numero}")
     
 
+
 @then('la nave colisionada gana la partida')
 def nave_destruccion(context):
     assert game.player1.score == 100, "La nave no gano la partida"
     game.reset_game()
+    
+@then('el jugador podrá visualizar los resultados de la partida')
+def draw_stats(context):
+    assert game.finalizacion,"No se abrio el menu de finalizacion"
+    game.reset_game()
+
 
     
 @then('la posicion de la moneda cambia a su posicion en el eje y inicial')
